@@ -4,7 +4,7 @@ version: 1.1.2
 homepage: https://github.com/appfactorysrl/aqua-ad-widget
 repository: https://github.com/appfactorysrl/aqua-ad-widget
 issue_tracker: https://github.com/appfactorysrl/aqua-ad-widget/issues
-publisher: appfactory.it
+
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
