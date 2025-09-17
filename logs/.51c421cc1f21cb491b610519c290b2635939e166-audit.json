@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Volumes/Other HD/GIT/aqua-platform-flutter/logs/.51c421cc1f21cb491b610519c290b2635939e166-audit.json",
+    "files": [
+        {
+            "date": 1758034737535,
+            "name": "/Volumes/Other HD/GIT/aqua-platform-flutter/logs/mcp-puppeteer-2025-09-16.log",
+            "hash": "b475210305bb6d3d36a9065fd7bacd4a068205efcface3388f5ae79f8b28853f"
+        }
+    ],
+    "hashType": "sha256"
+}
