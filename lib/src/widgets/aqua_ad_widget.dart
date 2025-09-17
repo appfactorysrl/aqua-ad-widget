@@ -6,6 +6,7 @@ import 'dart:async';
 import '../config/aqua_config.dart';
 import 'dart:html' as html if (dart.library.html) '';
 import 'dart:ui_web' as ui_web if (dart.library.html) '';
+import '../utils/url_launcher.dart';
 
 
 class AquaAdWidget extends StatefulWidget {
@@ -174,10 +175,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   }
 
   Future<void> _handleClick(String url) async {
-    if (kIsWeb) {
-      html.window.open(url, '_blank');
-    }
-    // Su mobile il click non è supportato per ora
+    await launchURL(url);
   }
 
   @override

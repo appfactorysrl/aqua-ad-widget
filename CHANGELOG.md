@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1
+
+* Fix mobile click handling with platform-specific URL launcher
+* Add clean architecture for cross-platform URL handling
+* Resolve compilation errors on all platforms
+* Improve code organization with separate utility files
+
 ## 1.1.0
 
 * Add Android and iOS platform support
