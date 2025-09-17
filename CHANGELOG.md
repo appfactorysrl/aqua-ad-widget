@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+* Add Android and iOS platform support
+* Refactor to single unified widget with conditional imports
+* Add url_launcher dependency for mobile link handling
+* Improve code maintainability with unified codebase
+
 ## 1.0.2
 
 * Update README with English documentation

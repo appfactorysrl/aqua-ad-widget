@@ -1,5 +1,10 @@
 # Aqua Ad Widget
 
+[![Pub Version](https://img.shields.io/pub/v/aqua_ad_widget)](https://pub.dev/packages/aqua_ad_widget)
+[![GitHub Issues](https://img.shields.io/github/issues/appfactorysrl/aqua-ad-widget)](https://github.com/appfactorysrl/aqua-ad-widget/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/appfactorysrl/aqua-ad-widget)](https://github.com/appfactorysrl/aqua-ad-widget)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A Flutter widget for Revive Adserver integration with support for image and video ads, auto-refresh, and click tracking.
 
 Developed for compatibility with [Aqua Platform](https://www.aquaplatform.com) (cloud managed version of Revive AdServer) and should be compatible with standard Revive AdServer installations.
@@ -57,6 +62,7 @@ Currently compatible with the following banner types:
 - **Auto-refresh**: Images refresh automatically after a configurable interval, videos reload when finished
 - **Click Tracking**: Full click-through support with proper URL handling
 - **Global Configuration**: Set default values once for the entire app
+- **Cross-Platform**: Supports Android, iOS, and Web platforms
 - **Web Optimized**: Built specifically for Flutter web with HTML video support
 - **Audio Controls**: Video ads include mute/unmute button overlay
 
