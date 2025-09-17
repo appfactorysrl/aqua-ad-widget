@@ -35,13 +35,13 @@ class HomePage extends StatelessWidget {
           children: [
             Text('Zona 11346', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            AquaAdWidget(zoneId: '11346'),
+            AquaAdWidget(zoneId: 11346),
             
             SizedBox(height: 32),
             
             Text('Zona 11562', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            AquaAdWidget(zoneId: '11562'),
+            AquaAdWidget(zoneId: 11562),
           ],
         ),
       ),

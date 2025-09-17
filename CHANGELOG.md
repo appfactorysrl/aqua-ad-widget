@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+* Change zoneId parameter from String to int
+* Add global configuration for base URL (AquaConfig.setDefaultBaseUrl)
+* Improve API consistency
+
 ## 1.0.0
 
 * Initial release

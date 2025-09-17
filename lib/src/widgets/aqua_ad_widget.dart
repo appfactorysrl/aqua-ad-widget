@@ -7,7 +7,7 @@ import 'dart:async';
 import '../config/aqua_config.dart';
 
 class AquaAdWidget extends StatefulWidget {
-  final String zoneId;
+  final int zoneId;
   final double? width;
   final double? height;
   final String? baseUrl;
@@ -62,7 +62,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     });
     
     try {
-      final baseUrl = widget.baseUrl ?? 'http://servedby.aqua-adserver.com/asyncspc.php';
+      final baseUrl = widget.baseUrl ?? AquaConfig.defaultBaseUrl;
       final prefix = widget.prefix ?? 'fanta-';
       final location = widget.location ?? AquaConfig.defaultLocation;
       
