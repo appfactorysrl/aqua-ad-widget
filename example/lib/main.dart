@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:aqua_ad_widget/aqua_platform.dart';
+import 'package:aqua_ad_widget/aqua_ad_widget.dart';
 
 void main() {
   // Configurazioni globali della libreria

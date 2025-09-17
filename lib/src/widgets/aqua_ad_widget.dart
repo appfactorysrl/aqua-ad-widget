@@ -30,7 +30,7 @@ class AquaAdWidget extends StatefulWidget {
 
 class _AquaAdWidgetState extends State<AquaAdWidget> {
   bool _isLoading = true;
-  String? _htmlContent;
+
   String? _clickUrl;
   String? _imageUrl;
   String? _videoUrl;
@@ -130,7 +130,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               _clickUrl = linkMatch?.group(1);
               _isVideo = true;
               _viewType = viewType;
-              _htmlContent = htmlContent;
               _isLoading = false;
             });
           } else if (imageMatch != null) {
@@ -140,7 +139,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               _imageUrl = imageMatch.group(1);
               _clickUrl = linkMatch?.group(1);
               _isVideo = false;
-              _htmlContent = htmlContent;
               _isLoading = false;
             });
             

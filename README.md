@@ -14,7 +14,7 @@ dependencies:
 ## Utilizzo
 
 ```dart
-import 'package:aqua_ad_widget/aqua_platform.dart';
+import 'package:aqua_ad_widget/aqua_ad_widget.dart';
 
 // Configura il refresh delle immagini (opzionale)
 AquaConfig.setImageRefreshSeconds(15); // default: 10 secondi
