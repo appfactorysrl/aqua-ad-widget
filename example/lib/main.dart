@@ -38,7 +38,7 @@ class HomePage extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.red, width: 2),
-                color: Colors.yellow.withOpacity(0.3),
+                color: Colors.yellow.withValues(alpha: 0.3),
               ),
               child: AquaAdWidget(zoneId: 11346),
             ),
@@ -50,7 +50,7 @@ class HomePage extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.blue, width: 2),
-                color: Colors.green.withOpacity(0.3),
+                color: Colors.green.withValues(alpha: 0.3),
               ),
               child: AquaAdWidget(zoneId: 99999), // Zone inesistente per testare
             ),
