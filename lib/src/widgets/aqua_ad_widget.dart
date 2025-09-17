@@ -14,7 +14,7 @@ class AquaAdWidget extends StatefulWidget {
   final double? width;
   final double? height;
   final String? baseUrl;
-  final String? prefix;
+
   final String? location;
   
   const AquaAdWidget({
@@ -23,7 +23,7 @@ class AquaAdWidget extends StatefulWidget {
     this.width,
     this.height,
     this.baseUrl,
-    this.prefix,
+
     this.location,
   });
 
@@ -64,7 +64,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     
     try {
       final baseUrl = widget.baseUrl ?? AquaConfig.defaultBaseUrl;
-      final prefix = widget.prefix ?? 'fanta-';
       final location = widget.location ?? AquaConfig.defaultLocation;
       
       if (location == null) {
@@ -76,15 +75,14 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       }
       
       final response = await http.get(
-        Uri.parse('$baseUrl?zones=${widget.zoneId}|${widget.zoneId}&prefix=$prefix&loc=$location'),
+        Uri.parse('$baseUrl?zones=${widget.zoneId}&loc=$location'),
       );
       
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        final zoneKey = '${prefix}0';
+        final data = json.decode(response.body) as List<dynamic>;
         
-        if (data.containsKey(zoneKey)) {
-          final adData = data[zoneKey] as Map<String, dynamic>;
+        if (data.isNotEmpty) {
+          final adData = data[0] as Map<String, dynamic>;
           final htmlContent = adData['html'] as String;
           
           final videoMatch = RegExp(r'<source src=\"([^\"]+)\"').firstMatch(htmlContent);
@@ -99,13 +97,15 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             _setupImage(imageMatch.group(1)!, linkMatch?.group(1));
           } else {
             setState(() {
-              _error = 'Nessuna pubblicità disponibile';
+              _error = null;
               _isLoading = false;
+              _imageUrl = null;
+              _videoUrl = null;
             });
           }
         } else {
           setState(() {
-            _error = 'Zona pubblicitaria non trovata';
+            _error = 'Nessuna pubblicità disponibile';
             _isLoading = false;
           });
         }
@@ -270,10 +270,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       );
     }
 
-    return SizedBox(
-      width: widget.width ?? 300,
-      height: widget.height ?? 250,
-      child: const Center(child: Text('Nessuna pubblicità disponibile')),
-    );
+    return const SizedBox.shrink();
   }
 }

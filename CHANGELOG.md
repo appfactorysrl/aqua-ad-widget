@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2
+
+* Remove prefix parameter to simplify API
+* Fix server response parsing (handle array format)
+* Widget disappears completely when no ads available
+* Improve error handling and user experience
+
 ## 1.1.1
 
 * Fix mobile click handling with platform-specific URL launcher

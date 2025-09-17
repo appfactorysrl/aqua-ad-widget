@@ -46,7 +46,7 @@ AquaAdWidget(
 - `width`: Widget width (optional, default: 300)
 - `height`: Widget height (optional, default: 250)
 - `baseUrl`: Revive server base URL (optional, uses AquaConfig.setDefaultBaseUrl if not specified)
-- `prefix`: Zone prefix (optional, default: 'fanta-')
+
 - `location`: Current page URL (optional, uses AquaConfig.setDefaultLocation if not specified)
 
 ## Supported Banner Types

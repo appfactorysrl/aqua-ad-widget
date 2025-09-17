@@ -5,7 +5,7 @@ void main() {
   // Configurazioni globali della libreria
   AquaConfig.setImageRefreshSeconds(15); // Refresh immagini ogni 15 secondi
   AquaConfig.setDefaultLocation('https://staging.fantasanremo.com'); // Location per tracking
-  
+
   runApp(const MyApp());
 }
 
@@ -29,19 +29,31 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Aqua Platform Test')),
-      body: const SingleChildScrollView(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
             Text('Zona 11346', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            AquaAdWidget(zoneId: 11346),
-            
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.red, width: 2),
+                color: Colors.yellow.withOpacity(0.3),
+              ),
+              child: AquaAdWidget(zoneId: 11346),
+            ),
+
             SizedBox(height: 32),
-            
-            Text('Zona 11562', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
+            Text('Zona 99999 (inesistente)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            AquaAdWidget(zoneId: 11562),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.blue, width: 2),
+                color: Colors.green.withOpacity(0.3),
+              ),
+              child: AquaAdWidget(zoneId: 99999), // Zone inesistente per testare
+            ),
           ],
         ),
       ),
