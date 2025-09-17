@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+* Update README with English documentation
+* Add Aqua Platform compatibility information
+* Document supported banner types (Local, External, AdserverPlugins.com In-Banner Video)
+
 ## 1.0.1
 
 * Change zoneId parameter from String to int
