@@ -135,7 +135,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         });
 
         if (loadedAds.length == 1) {
-          _startRefreshTimer();
+          final firstAd = loadedAds[0];
+          if (!firstAd['isVideo']) {
+            _startRefreshTimer();
+          }
         }
       } else {
         setState(() {
@@ -181,7 +184,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           ..style.objectFit = 'cover';
 
         video.onEnded.listen((_) {
-          if (widget.adCount == 1) {
+          if (loadedAds.length == 1) {
             _loadAd();
           }
         });
