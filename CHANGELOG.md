@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.1
+
+* Fix dart analyze issues
+* Resolve undefined_identifier error
+* Make _pageController final
+* Replace deprecated withOpacity with withValues
+
 ## 2.0.0
 
 * **BREAKING CHANGES**: Major feature release with new parameters
