@@ -39,6 +39,13 @@ AquaAdWidget(
   height: 250,
   ratio: 16/9, // optional, default: 16/9
   autoGrow: false, // optional, default: false
+  adCount: 1, // optional, default: 1
+)
+
+// Carousel with auto-detection
+AquaAdWidget(
+  zoneId: 123,
+  adCount: 'auto', // loads up to 5 ads automatically
 )
 ```
 
@@ -51,6 +58,7 @@ AquaAdWidget(
 - `location`: Current page URL (optional, uses AquaConfig.setDefaultLocation if not specified)
 - `ratio`: Aspect ratio for the widget (optional, default: 16/9). Used when width is specified or when taking 100% container width
 - `autoGrow`: When true, uses the actual ad dimensions to set the aspect ratio (optional, default: false)
+- `adCount`: Number of ads to load for carousel functionality (optional, default: 1). When > 1, displays ads in a carousel with dot navigation. Use 'auto' to automatically load up to 5 ads
 
 ## Supported Banner Types
 

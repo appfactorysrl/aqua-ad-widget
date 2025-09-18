@@ -127,6 +127,43 @@ class HomePage extends StatelessWidget {
                 autoGrow: true,
               ),
             ),
+
+            SizedBox(height: 40),
+            Divider(thickness: 2),
+            Text('ESEMPIO CAROUSEL', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
+            SizedBox(height: 20),
+
+            Text('Zona 11346 - Carousel con 2 AD', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.deepOrange, width: 2),
+                color: Colors.lime.withValues(alpha: 0.3),
+              ),
+              child: AquaAdWidget(
+                zoneId: 11346,
+                width: 350,
+                ratio: 16/9,
+                adCount: 2,
+              ),
+            ),
+
+            SizedBox(height: 32),
+
+            Text('Zona 11346 - Carousel AUTO (fino a 5 AD)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.red, width: 2),
+                color: Colors.blue.withValues(alpha: 0.3),
+              ),
+              child: AquaAdWidget(
+                zoneId: 11346,
+                width: 300,
+                ratio: 16/9,
+                adCount: 'auto',
+              ),
+            ),
           ],
         ),
       ),
