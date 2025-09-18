@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0
+
+* **MAJOR**: Replace dart:html with video_player for unified cross-platform video support
+* Fix iOS build errors by removing web-only dependencies
+* Unified video implementation works on Android, iOS, and Web
+* Video ads now start muted with working mute/unmute toggle
+* Video scaling improved with proper cover behavior and clipping
+* Prevent premature video reload during initialization
+* Simplified codebase with single video widget implementation
+
 ## 2.0.1
 
 * Fix dart analyze issues

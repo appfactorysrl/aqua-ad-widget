@@ -1,12 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import '../config/aqua_config.dart';
-import 'dart:html' as html if (dart.library.html) '';
-import 'dart:ui_web' as ui_web if (dart.library.html) '';
 import '../utils/url_launcher.dart';
+import 'video_ad_widget.dart';
 
 
 class AquaAdWidget extends StatefulWidget {
@@ -161,86 +159,18 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     });
   }
 
-  String _getViewType(String videoUrl, int index) {
-    return 'video-${widget.zoneId}-${videoUrl.hashCode}-$index';
-  }
 
-  void _setupWebVideo(String videoUrl, int index) {
-    if (!kIsWeb) return;
-
-    final viewType = _getViewType(videoUrl, index);
-
-    ui_web.platformViewRegistry.registerViewFactory(
-      viewType,
-      (int viewId) {
-        final video = html.VideoElement()
-          ..src = videoUrl
-          ..autoplay = true
-          ..muted = true
-          ..loop = false
-          ..controls = false
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..style.objectFit = 'cover';
-
-        video.onEnded.listen((_) {
-          if (_ads.length == 1) {
-            _loadAd();
-          }
-        });
-
-        return video;
-      },
-    );
-  }
 
   Future<void> _handleClick(String url) async {
     await launchURL(url);
   }
 
   Widget _buildAdContent(Map<String, dynamic> ad, int index) {
-    if (kIsWeb && ad['isVideo'] && ad['videoUrl'] != null) {
-      _setupWebVideo(ad['videoUrl'], index);
-      final viewType = _getViewType(ad['videoUrl'], index);
-
-      return Stack(
-        children: [
-          HtmlElementView(viewType: viewType),
-          if (ad['clickUrl'] != null)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () => _handleClick(ad['clickUrl']),
-                child: Container(color: Colors.transparent),
-              ),
-            ),
-          Positioned(
-            top: 8,
-            right: 8,
-            child: GestureDetector(
-              onTap: () {
-                if (kIsWeb) {
-                  final video = html.document.querySelector('video[src="${ad['videoUrl']}"]') as html.VideoElement?;
-                  if (video != null) {
-                    video.muted = !video.muted;
-                    setState(() {});
-                  }
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(
-                  Icons.volume_off,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
-        ],
+    if (ad['isVideo'] && ad['videoUrl'] != null) {
+      return VideoAdWidget(
+        videoUrl: ad['videoUrl'],
+        clickUrl: ad['clickUrl'],
+        onVideoEnded: _ads.length == 1 ? _loadAd : null,
       );
     }
 
