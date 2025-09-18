@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.0
+
+* **BREAKING CHANGES**: Major feature release with new parameters
+* Add `ratio` parameter for aspect ratio control (default: 16/9)
+* Add `autoGrow` parameter to use actual ad dimensions for ratio
+* Add `adCount` parameter for carousel functionality
+* Support `adCount: 'auto'` mode to load up to 5 ads automatically
+* Implement carousel with PageView and dot navigation
+* Smart widget sizing: fixed width or full container width with ratio
+* Filter invalid ads (width/height = 0) automatically
+* Disable auto-refresh when carousel is active
+* Preserve video auto-refresh on end behavior
+* Update example app with comprehensive demonstrations
+* Update documentation with all new parameters and usage examples
+
 ## 1.1.2
 
 * Remove prefix parameter to simplify API
