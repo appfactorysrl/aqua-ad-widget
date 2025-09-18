@@ -14,8 +14,9 @@ class AquaAdWidget extends StatefulWidget {
   final double? width;
   final double? height;
   final String? baseUrl;
-
   final String? location;
+  final double ratio;
+  final bool autoGrow;
   
   const AquaAdWidget({
     super.key,
@@ -23,8 +24,9 @@ class AquaAdWidget extends StatefulWidget {
     this.width,
     this.height,
     this.baseUrl,
-
     this.location,
+    this.ratio = 16/9,
+    this.autoGrow = false,
   });
 
   @override
@@ -41,6 +43,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   String? _error;
   String? _viewType;
   Timer? _refreshTimer;
+  double? _adWidth;
+  double? _adHeight;
+  double? _currentRatio;
 
   @override
   void initState() {
@@ -84,6 +89,18 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         if (data.isNotEmpty) {
           final adData = data[0] as Map<String, dynamic>;
           final htmlContent = adData['html'] as String;
+          
+          if (widget.autoGrow) {
+            final width = adData['width'];
+            final height = adData['height'];
+            if (width != null && height != null) {
+              _adWidth = double.tryParse(width.toString());
+              _adHeight = double.tryParse(height.toString());
+              if (_adWidth != null && _adHeight != null && _adHeight! > 0) {
+                _currentRatio = _adWidth! / _adHeight!;
+              }
+            }
+          }
           
           final videoMatch = RegExp(r'<source src=\"([^\"]+)\"').firstMatch(htmlContent);
           final imageMatch = RegExp(r"src='([^']+)'").firstMatch(htmlContent);
@@ -178,28 +195,39 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     await launchURL(url);
   }
 
+  Widget _buildSizedContainer({required Widget child}) {
+    final ratio = _currentRatio ?? widget.ratio;
+    
+    if (widget.width != null) {
+      return SizedBox(
+        width: widget.width,
+        height: widget.height ?? (widget.width! / ratio),
+        child: child,
+      );
+    }
+    
+    return AspectRatio(
+      aspectRatio: ratio,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return SizedBox(
-        width: widget.width ?? 300,
-        height: widget.height ?? 250,
+      return _buildSizedContainer(
         child: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_error != null) {
-      return SizedBox(
-        width: widget.width ?? 300,
-        height: widget.height ?? 250,
+      return _buildSizedContainer(
         child: Center(child: Text(_error!)),
       );
     }
 
     if (kIsWeb && _isVideo && _videoUrl != null && _viewType != null) {
-      return SizedBox(
-        width: widget.width ?? 300,
-        height: widget.height ?? 250,
+      return _buildSizedContainer(
         child: Stack(
           children: [
             HtmlElementView(viewType: _viewType!),
@@ -251,9 +279,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       
       return GestureDetector(
         onTap: _clickUrl != null ? () => _handleClick(_clickUrl!) : null,
-        child: SizedBox(
-          width: widget.width ?? 300,
-          height: widget.height ?? 250,
+        child: _buildSizedContainer(
           child: Image.network(
             imageUrl,
             fit: BoxFit.cover,

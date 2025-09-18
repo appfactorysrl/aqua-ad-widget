@@ -37,6 +37,8 @@ AquaAdWidget(
   zoneId: 123,
   width: 300,
   height: 250,
+  ratio: 16/9, // optional, default: 16/9
+  autoGrow: false, // optional, default: false
 )
 ```
 
@@ -46,8 +48,9 @@ AquaAdWidget(
 - `width`: Widget width (optional, default: 300)
 - `height`: Widget height (optional, default: 250)
 - `baseUrl`: Revive server base URL (optional, uses AquaConfig.setDefaultBaseUrl if not specified)
-
 - `location`: Current page URL (optional, uses AquaConfig.setDefaultLocation if not specified)
+- `ratio`: Aspect ratio for the widget (optional, default: 16/9). Used when width is specified or when taking 100% container width
+- `autoGrow`: When true, uses the actual ad dimensions to set the aspect ratio (optional, default: false)
 
 ## Supported Banner Types
 

@@ -9,7 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  aqua_ad_widget: ^1.1.1
+  aqua_ad_widget:
+    path: ../
 
 dev_dependencies:
   flutter_test:
