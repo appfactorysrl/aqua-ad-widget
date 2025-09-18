@@ -45,7 +45,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   List<Map<String, dynamic>> _ads = [];
   int _currentAdIndex = 0;
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -184,7 +184,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           ..style.objectFit = 'cover';
 
         video.onEnded.listen((_) {
-          if (loadedAds.length == 1) {
+          if (_ads.length == 1) {
             _loadAd();
           }
         });
@@ -348,7 +348,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
                       shape: BoxShape.circle,
                       color: _currentAdIndex == index
                           ? Colors.white
-                          : Colors.white.withOpacity(0.5),
+                          : Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 );
