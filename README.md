@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^2.1.0
+  aqua_ad_widget: ^2.1.1
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ AquaConfig.setImageRefreshSeconds(15); // default: 10 seconds
 // Configure global location (required)
 AquaConfig.setDefaultLocation('https://mysite.com');
 
-// Configure server URL (optional)
+// Configure server URL (optional, default: http://servedby.aqua-adserver.com/asyncspc.php)
 AquaConfig.setDefaultBaseUrl('https://myserver.com/asyncspc.php');
 
 // Display an ad
@@ -54,7 +54,7 @@ AquaAdWidget(
 - `zoneId`: Numeric ID of the ad zone (required)
 - `width`: Widget width (optional, default: 300)
 - `height`: Widget height (optional, default: 250)
-- `baseUrl`: Revive server base URL (optional, uses AquaConfig.setDefaultBaseUrl if not specified)
+- `baseUrl`: Revive server base URL (optional, uses AquaConfig.setDefaultBaseUrl if not specified, default: http://servedby.aqua-adserver.com/asyncspc.php)
 - `location`: Current page URL (optional, uses AquaConfig.setDefaultLocation if not specified)
 - `ratio`: Aspect ratio for the widget (optional, default: 16/9). Used when width is specified or when taking 100% container width
 - `autoGrow`: When true, uses the actual ad dimensions to set the aspect ratio (optional, default: false)
@@ -89,12 +89,30 @@ void main() {
   // Optional: Customize refresh interval (default: 10 seconds)
   AquaConfig.setImageRefreshSeconds(15);
   
-  // Optional: Set custom Revive server URL
+  // Optional: Set custom Revive server URL (default: http://servedby.aqua-adserver.com/asyncspc.php)
   AquaConfig.setDefaultBaseUrl('https://ads.myserver.com/asyncspc.php');
   
   runApp(MyApp());
 }
 ```
+
+### Finding Your Server URL
+
+To find your specific server URL:
+
+**Aqua Platform Users:**
+1. Log into your Aqua Platform dashboard
+2. Go to "Inventory" → "Zones"
+3. Click on any zone and select "Get Tag"
+4. In the generated HTML code, look for the URL in the script src attribute (e.g., `src="https://yoursite.aqua-adserver.com/asyncspc.php"`)
+
+**Revive AdServer Users:**
+1. Log into your Revive AdServer admin panel
+2. Navigate to "Inventory" → "Zones"
+3. Select a zone and click "Zone Tags"
+4. Choose "Asynchronous JS Tag" and copy the URL from the generated code
+
+Use this URL with `AquaConfig.setDefaultBaseUrl()` in your Flutter app.
 
 ## License
 

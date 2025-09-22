@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+
+* Add documentation for finding server URL in Revive AdServer and Aqua Platform control panels
+* Clarify default server URL configuration in README
+* Improve setup instructions with step-by-step guide for URL discovery
+
 ## 2.1.0
 
 * **MAJOR**: Replace dart:html with video_player for unified cross-platform video support
