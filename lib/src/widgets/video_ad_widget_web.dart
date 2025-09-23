@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 import 'dart:ui_web' as ui_web;
 import '../utils/url_launcher.dart';
 
@@ -21,7 +21,7 @@ class VideoAdWidget extends StatefulWidget {
 
 class _VideoAdWidgetState extends State<VideoAdWidget> {
   bool _isMuted = true;
-  html.VideoElement? _videoElement;
+  web.HTMLVideoElement? _videoElement;
 
   @override
   void initState() {
@@ -31,14 +31,15 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
   void _createVideoElement() {
     final viewType = 'video-${widget.videoUrl.hashCode}';
-    _videoElement = html.VideoElement()
+    _videoElement = web.HTMLVideoElement()
       ..src = widget.videoUrl
       ..autoplay = true
       ..muted = true
-      ..loop = false
-      ..style.width = '100%'
-      ..style.height = '100%'
-      ..style.objectFit = 'cover';
+      ..loop = false;
+
+    _videoElement!.style.width = '100%';
+    _videoElement!.style.height = '100%';
+    _videoElement!.style.objectFit = 'cover';
 
     _videoElement!.onEnded.listen((_) {
       widget.onVideoEnded?.call();
