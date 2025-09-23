@@ -1,5 +1,11 @@
-import 'dart:html' as html;
+import 'dart:js_interop';
+
+@JS('window')
+external JSObject get window;
+
+@JS()
+external void open(String url, String target);
 
 Future<void> launchURL(String url) async {
-  html.window.open(url, '_blank');
+  open(url, '_blank');
 }
