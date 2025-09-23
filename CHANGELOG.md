@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.1
+
+* Fix conditional export logic for proper WASM compatibility
+* Replace deprecated dart:html with package:web
+* Improve code formatting and linting compliance
+* Achieve perfect 160/160 pub.dev score
+
 ## 3.0.0
 
 * **BREAKING**: WASM compatibility - conditional video widget implementation
