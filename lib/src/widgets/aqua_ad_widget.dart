@@ -7,16 +7,71 @@ import '../utils/url_launcher.dart';
 import 'video_ad_widget.dart';
 
 
+/// A Flutter widget that displays advertisements from Revive AdServer or Aqua Platform.
+///
+/// This widget supports both image and video advertisements with automatic refresh,
+/// click tracking, and carousel functionality for multiple ads.
+///
+/// Example usage:
+/// ```dart
+/// AquaAdWidget(
+///   zoneId: 123,
+///   width: 300,
+///   height: 250,
+/// )
+/// ```
 class AquaAdWidget extends StatefulWidget {
+  /// The numeric ID of the ad zone from your Revive AdServer.
   final int zoneId;
+  
+  /// The width of the widget in pixels.
+  ///
+  /// If not specified, the widget will take the full width of its container
+  /// and use the [ratio] to determine height.
   final double? width;
+  
+  /// The height of the widget in pixels.
+  ///
+  /// If not specified and [width] is provided, height will be calculated
+  /// using the [ratio]. If neither are specified, [ratio] determines the aspect ratio.
   final double? height;
+  
+  /// The base URL for the Revive AdServer.
+  ///
+  /// If not provided, uses the value set via [AquaConfig.setDefaultBaseUrl].
+  /// Defaults to the Aqua Platform server if not configured.
   final String? baseUrl;
+  
+  /// The current page URL for ad tracking.
+  ///
+  /// If not provided, uses the value set via [AquaConfig.setDefaultLocation].
+  /// This parameter is required for proper ad tracking.
   final String? location;
+  
+  /// The aspect ratio for the widget.
+  ///
+  /// Used when [width] is specified or when taking full container width.
+  /// Defaults to 16/9.
   final double ratio;
+  
+  /// Whether to use the actual ad dimensions to set the aspect ratio.
+  ///
+  /// When true, the widget will use the dimensions from the first loaded ad
+  /// to determine its aspect ratio, overriding the [ratio] parameter.
+  /// Defaults to false.
   final bool autoGrow;
+  
+  /// The number of ads to load for carousel functionality.
+  ///
+  /// Can be an integer (1 or more) or the string 'auto' to automatically
+  /// load up to 5 ads. When greater than 1, displays ads in a carousel
+  /// with dot navigation. Defaults to 1.
   final dynamic adCount;
 
+  /// Creates an [AquaAdWidget].
+  ///
+  /// The [zoneId] parameter is required and must correspond to a valid
+  /// zone ID in your Revive AdServer configuration.
   const AquaAdWidget({
     super.key,
     required this.zoneId,
