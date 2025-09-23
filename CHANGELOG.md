@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.0
+
+* **BREAKING**: Improve pub.dev score with comprehensive improvements
+* Add complete dartdoc documentation for all public API elements
+* Replace dart:html with dart:js_interop for WASM compatibility
+* Fix all static analysis issues and formatting
+* Resolve test compatibility issues
+* Achieve full pub.dev scoring requirements
+
 ## 2.1.1
 
 * Add documentation for finding server URL in Revive AdServer and Aqua Platform control panels
