@@ -22,6 +22,7 @@ class VideoAdWidget extends StatefulWidget {
 class _VideoAdWidgetState extends State<VideoAdWidget> {
   bool _isMuted = true;
   web.HTMLVideoElement? _videoElement;
+  late String _viewType;
 
   @override
   void initState() {
@@ -30,10 +31,10 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   }
 
   void _createVideoElement() {
-    final viewType = 'video-${widget.videoUrl.hashCode}';
+    _viewType =
+        'video-${widget.videoUrl.hashCode}-${DateTime.now().millisecondsSinceEpoch}';
     _videoElement = web.HTMLVideoElement()
       ..src = widget.videoUrl
-      ..autoplay = true
       ..muted = true
       ..loop = false;
 
@@ -45,8 +46,12 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
       widget.onVideoEnded?.call();
     });
 
+    _videoElement!.onLoadedData.listen((_) {
+      _videoElement!.play();
+    });
+
     ui_web.platformViewRegistry.registerViewFactory(
-      viewType,
+      _viewType,
       (int viewId) => _videoElement!,
     );
   }
@@ -57,7 +62,8 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
       children: [
         SizedBox.expand(
           child: HtmlElementView(
-            viewType: 'video-${widget.videoUrl.hashCode}',
+            key: ValueKey(_viewType),
+            viewType: _viewType,
           ),
         ),
         if (widget.clickUrl != null)

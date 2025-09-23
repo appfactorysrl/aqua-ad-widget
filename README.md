@@ -73,9 +73,10 @@ Currently compatible with the following banner types:
 - **Auto-refresh**: Images refresh automatically after a configurable interval, videos reload when finished
 - **Click Tracking**: Full click-through support with proper URL handling
 - **Global Configuration**: Set default values once for the entire app
-- **Cross-Platform**: Supports Android, iOS, and Web platforms
+- **Cross-Platform**: Supports Android, iOS, Web, macOS, Linux, and Windows platforms
 - **Web Optimized**: Built specifically for Flutter web with HTML video support
 - **Audio Controls**: Video ads include mute/unmute button overlay
+- **Carousel Auto-Advance**: Configurable automatic slide progression in carousels
 
 ## Configuration
 
@@ -91,6 +92,9 @@ void main() {
   
   // Optional: Set custom Revive server URL (default: http://servedby.aqua-adserver.com/asyncspc.php)
   AquaConfig.setDefaultBaseUrl('https://ads.myserver.com/asyncspc.php');
+  
+  // Optional: Enable/disable carousel auto-advance (default: true)
+  AquaConfig.setCarouselAutoAdvance(true);
   
   runApp(MyApp());
 }

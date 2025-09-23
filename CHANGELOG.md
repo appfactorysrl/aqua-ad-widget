@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0
+
+* Add configurable carousel auto-advance functionality
+* Fix web video widget inspector errors with unique keys
+* Add carousel timer management for automatic slide progression
+* Improve video handling in carousel mode
+* Perfect 160/160 pub.dev score with 100% documentation
+
 ## 3.0.1
 
 * Fix conditional export logic for proper WASM compatibility

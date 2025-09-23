@@ -3,10 +3,13 @@
 /// Use this class to configure default values that will be used across
 /// all [AquaAdWidget] instances in your application.
 class AquaConfig {
+  /// Private constructor to prevent instantiation.
+  AquaConfig._();
   static int _imageRefreshSeconds = 10;
   static String? _defaultLocation;
   static String _defaultBaseUrl =
       'http://servedby.aqua-adserver.com/asyncspc.php';
+  static bool _carouselAutoAdvance = true;
 
   /// Gets the current image refresh interval in seconds.
   static int get imageRefreshSeconds => _imageRefreshSeconds;
@@ -16,6 +19,9 @@ class AquaConfig {
 
   /// Gets the default base URL for the Revive AdServer.
   static String get defaultBaseUrl => _defaultBaseUrl;
+
+  /// Gets whether carousel auto-advance is enabled.
+  static bool get carouselAutoAdvance => _carouselAutoAdvance;
 
   /// Sets the refresh interval for image advertisements.
   ///
@@ -40,5 +46,13 @@ class AquaConfig {
   /// If not set, defaults to the Aqua Platform server.
   static void setDefaultBaseUrl(String baseUrl) {
     _defaultBaseUrl = baseUrl;
+  }
+
+  /// Sets whether carousel should auto-advance.
+  ///
+  /// [enabled] controls automatic slide advancement in carousels.
+  /// Default is true.
+  static void setCarouselAutoAdvance(bool enabled) {
+    _carouselAutoAdvance = enabled;
   }
 }

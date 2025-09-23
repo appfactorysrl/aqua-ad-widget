@@ -98,6 +98,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   List<Map<String, dynamic>> _ads = [];
   int _currentAdIndex = 0;
   final PageController _pageController = PageController();
+  Timer? _carouselTimer;
 
   @override
   void initState() {
@@ -108,6 +109,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _carouselTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -197,6 +199,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           if (!firstAd['isVideo']) {
             _startRefreshTimer();
           }
+        } else if (AquaConfig.carouselAutoAdvance) {
+          _startCarouselTimer();
         }
       } else {
         setState(() {
@@ -220,6 +224,29 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     });
   }
 
+  void _startCarouselTimer() {
+    _carouselTimer?.cancel();
+    if (_ads.isEmpty) return;
+
+    final currentAd = _ads[_currentAdIndex];
+    final duration = currentAd['isVideo'] ? 30 : AquaConfig.imageRefreshSeconds;
+
+    _carouselTimer = Timer(Duration(seconds: duration), () {
+      _nextSlide();
+    });
+  }
+
+  void _nextSlide() {
+    if (_ads.isEmpty) return;
+
+    final nextIndex = (_currentAdIndex + 1) % _ads.length;
+    _pageController.animateToPage(
+      nextIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   Future<void> _handleClick(String url) async {
     await launchURL(url);
   }
@@ -229,7 +256,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       return VideoAdWidget(
         videoUrl: ad['videoUrl'],
         clickUrl: ad['clickUrl'],
-        onVideoEnded: _ads.length == 1 ? _loadAd : null,
+        onVideoEnded: _ads.length == 1
+            ? _loadAd
+            : (AquaConfig.carouselAutoAdvance ? _nextSlide : null),
       );
     }
 
@@ -309,6 +338,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               setState(() {
                 _currentAdIndex = index;
               });
+              if (AquaConfig.carouselAutoAdvance) {
+                _startCarouselTimer();
+              }
             },
             itemCount: _ads.length,
             itemBuilder: (context, index) {
