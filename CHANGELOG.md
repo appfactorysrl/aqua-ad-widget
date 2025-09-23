@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.0
+
+* **BREAKING**: WASM compatibility - conditional video widget implementation
+* Add support for all Flutter platforms: macOS, Linux, Windows
+* Web implementation uses HTML video elements (WASM compatible)
+* Mobile/Desktop implementation uses video_player package
+* Conditional exports prevent dart:io dependency on web platforms
+* Full cross-platform support maintained
+
 ## 2.2.0
 
 * **BREAKING**: Improve pub.dev score with comprehensive improvements

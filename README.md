@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^2.2.0
+  aqua_ad_widget: ^3.0.0
 ```
 
 ## Usage
