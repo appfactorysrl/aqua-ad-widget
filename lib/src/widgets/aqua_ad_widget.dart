@@ -6,7 +6,6 @@ import '../config/aqua_config.dart';
 import '../utils/url_launcher.dart';
 import 'video_ad_widget.dart';
 
-
 /// A Flutter widget that displays advertisements from Revive AdServer or Aqua Platform.
 ///
 /// This widget supports both image and video advertisements with automatic refresh,
@@ -23,44 +22,44 @@ import 'video_ad_widget.dart';
 class AquaAdWidget extends StatefulWidget {
   /// The numeric ID of the ad zone from your Revive AdServer.
   final int zoneId;
-  
+
   /// The width of the widget in pixels.
   ///
   /// If not specified, the widget will take the full width of its container
   /// and use the [ratio] to determine height.
   final double? width;
-  
+
   /// The height of the widget in pixels.
   ///
   /// If not specified and [width] is provided, height will be calculated
   /// using the [ratio]. If neither are specified, [ratio] determines the aspect ratio.
   final double? height;
-  
+
   /// The base URL for the Revive AdServer.
   ///
   /// If not provided, uses the value set via [AquaConfig.setDefaultBaseUrl].
   /// Defaults to the Aqua Platform server if not configured.
   final String? baseUrl;
-  
+
   /// The current page URL for ad tracking.
   ///
   /// If not provided, uses the value set via [AquaConfig.setDefaultLocation].
   /// This parameter is required for proper ad tracking.
   final String? location;
-  
+
   /// The aspect ratio for the widget.
   ///
   /// Used when [width] is specified or when taking full container width.
   /// Defaults to 16/9.
   final double ratio;
-  
+
   /// Whether to use the actual ad dimensions to set the aspect ratio.
   ///
   /// When true, the widget will use the dimensions from the first loaded ad
   /// to determine its aspect ratio, overriding the [ratio] parameter.
   /// Defaults to false.
   final bool autoGrow;
-  
+
   /// The number of ads to load for carousel functionality.
   ///
   /// Can be an integer (1 or more) or the string 'auto' to automatically
@@ -79,7 +78,7 @@ class AquaAdWidget extends StatefulWidget {
     this.height,
     this.baseUrl,
     this.location,
-    this.ratio = 16/9,
+    this.ratio = 16 / 9,
     this.autoGrow = false,
     this.adCount = 1,
   });
@@ -127,14 +126,17 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
       if (location == null) {
         setState(() {
-          _error = 'Location non configurata. Usa AquaConfig.setDefaultLocation()';
+          _error =
+              'Location non configurata. Usa AquaConfig.setDefaultLocation()';
           _isLoading = false;
         });
         return;
       }
 
-      final int requestCount = widget.adCount == 'auto' ? 5 : widget.adCount as int;
-      final zones = List.filled(requestCount, widget.zoneId.toString()).join('|');
+      final int requestCount =
+          widget.adCount == 'auto' ? 5 : widget.adCount as int;
+      final zones =
+          List.filled(requestCount, widget.zoneId.toString()).join('|');
       final response = await http.get(
         Uri.parse('$baseUrl?zones=$zones&loc=$location'),
       );
@@ -152,7 +154,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
           final htmlContent = adData['html'] as String;
 
-          final videoMatch = RegExp(r'<source src=\"([^\"]+)\"').firstMatch(htmlContent);
+          final videoMatch =
+              RegExp(r'<source src=\"([^\"]+)\"').firstMatch(htmlContent);
           final imageMatch = RegExp(r"src='([^']+)'").firstMatch(htmlContent);
           final linkMatch = videoMatch != null
               ? RegExp(r'<a href=\"([^\"]+)\"').firstMatch(htmlContent)
@@ -173,7 +176,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       }
 
       if (loadedAds.isNotEmpty) {
-        if (widget.autoGrow && loadedAds[0]['width'] != null && loadedAds[0]['height'] != null) {
+        if (widget.autoGrow &&
+            loadedAds[0]['width'] != null &&
+            loadedAds[0]['height'] != null) {
           _adWidth = double.tryParse(loadedAds[0]['width'].toString());
           _adHeight = double.tryParse(loadedAds[0]['height'].toString());
           if (_adWidth != null && _adHeight != null && _adHeight! > 0) {
@@ -209,12 +214,11 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _startRefreshTimer() {
     _refreshTimer?.cancel();
-    _refreshTimer = Timer(Duration(seconds: AquaConfig.imageRefreshSeconds), () {
+    _refreshTimer =
+        Timer(Duration(seconds: AquaConfig.imageRefreshSeconds), () {
       _loadAd();
     });
   }
-
-
 
   Future<void> _handleClick(String url) async {
     await launchURL(url);
@@ -235,7 +239,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           : ad['imageUrl'];
 
       return GestureDetector(
-        onTap: ad['clickUrl'] != null ? () => _handleClick(ad['clickUrl']) : null,
+        onTap:
+            ad['clickUrl'] != null ? () => _handleClick(ad['clickUrl']) : null,
         child: Image.network(
           imageUrl,
           fit: BoxFit.cover,

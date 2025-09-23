@@ -33,12 +33,13 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
         _controller.play();
         _hasStarted = true;
       });
-    
+
     _controller.addListener(_onVideoEnd);
   }
 
   void _onVideoEnd() {
-    if (_hasStarted && _controller.value.position >= _controller.value.duration) {
+    if (_hasStarted &&
+        _controller.value.position >= _controller.value.duration) {
       widget.onVideoEnded?.call();
     }
   }
