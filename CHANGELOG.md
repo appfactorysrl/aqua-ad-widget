@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.2.0
+
+* Add AquaSettings class for per-widget configuration
+* Rename setImageRefreshSeconds to setDefaultAdRefreshSeconds with deprecation
+* Rename setCarouselAutoAdvance to setDefaultCarouselAutoAdvance with deprecation
+* Add ability to disable auto-refresh by setting adRefreshSeconds to false
+* Move baseUrl and location parameters to AquaSettings with deprecation
+* Improve API consistency with settings-based configuration
+* Maintain backward compatibility with deprecated parameters
+
 ## 3.1.0
 
 * Add configurable carousel auto-advance functionality

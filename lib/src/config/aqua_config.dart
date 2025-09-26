@@ -5,14 +5,17 @@
 class AquaConfig {
   /// Private constructor to prevent instantiation.
   AquaConfig._();
-  static int _imageRefreshSeconds = 10;
+  static dynamic _adRefreshSeconds = 10;
   static String? _defaultLocation;
   static String _defaultBaseUrl =
       'http://servedby.aqua-adserver.com/asyncspc.php';
   static bool _carouselAutoAdvance = true;
 
   /// Gets the current image refresh interval in seconds.
-  static int get imageRefreshSeconds => _imageRefreshSeconds;
+  static int get imageRefreshSeconds => _adRefreshSeconds is bool ? 10 : _adRefreshSeconds;
+
+  /// Gets the current ad refresh interval in seconds or false if disabled.
+  static dynamic get adRefreshSeconds => _adRefreshSeconds;
 
   /// Gets the default location URL used for ad tracking.
   static String? get defaultLocation => _defaultLocation;
@@ -27,8 +30,18 @@ class AquaConfig {
   ///
   /// [seconds] must be a positive integer representing the number of seconds
   /// between automatic ad refreshes. Default is 10 seconds.
+  @Deprecated('Use setDefaultAdRefreshSeconds instead')
   static void setImageRefreshSeconds(int seconds) {
-    _imageRefreshSeconds = seconds;
+    setDefaultAdRefreshSeconds(seconds);
+  }
+
+  /// Sets the refresh interval for advertisements.
+  ///
+  /// [seconds] can be a positive integer representing the number of seconds
+  /// between automatic ad refreshes, or false to disable auto-refresh.
+  /// Default is 10 seconds.
+  static void setDefaultAdRefreshSeconds(dynamic seconds) {
+    _adRefreshSeconds = seconds;
   }
 
   /// Sets the default location URL for ad tracking.
@@ -52,7 +65,16 @@ class AquaConfig {
   ///
   /// [enabled] controls automatic slide advancement in carousels.
   /// Default is true.
+  @Deprecated('Use setDefaultCarouselAutoAdvance instead')
   static void setCarouselAutoAdvance(bool enabled) {
+    setDefaultCarouselAutoAdvance(enabled);
+  }
+
+  /// Sets whether carousel should auto-advance.
+  ///
+  /// [enabled] controls automatic slide advancement in carousels.
+  /// Default is true.
+  static void setDefaultCarouselAutoAdvance(bool enabled) {
     _carouselAutoAdvance = enabled;
   }
 }

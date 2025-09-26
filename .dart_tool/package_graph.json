@@ -5,12 +5,13 @@
   "packages": [
     {
       "name": "aqua_ad_widget",
-      "version": "3.0.0",
+      "version": "3.1.0",
       "dependencies": [
         "flutter",
         "http",
         "url_launcher",
-        "video_player"
+        "video_player",
+        "web"
       ],
       "devDependencies": [
         "flutter_lints",
@@ -41,6 +42,11 @@
         "test_api",
         "vector_math"
       ]
+    },
+    {
+      "name": "web",
+      "version": "1.1.1",
+      "dependencies": []
     },
     {
       "name": "video_player",
@@ -278,11 +284,6 @@
         "flutter",
         "url_launcher_platform_interface"
       ]
-    },
-    {
-      "name": "web",
-      "version": "1.1.1",
-      "dependencies": []
     },
     {
       "name": "http_parser",

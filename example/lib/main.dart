@@ -3,7 +3,7 @@ import 'package:aqua_ad_widget/aqua_ad_widget.dart';
 
 void main() {
   // Configurazioni globali della libreria
-  AquaConfig.setImageRefreshSeconds(15); // Refresh immagini ogni 15 secondi
+  AquaConfig.setDefaultAdRefreshSeconds(15); // Refresh immagini ogni 15 secondi
   AquaConfig.setDefaultLocation(
       'https://staging.fantasanremo.com'); // Location per tracking
 

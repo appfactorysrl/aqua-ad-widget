@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import '../config/aqua_config.dart';
+import '../config/aqua_settings.dart';
 import '../utils/url_launcher.dart';
 import 'video_ad_widget.dart';
 
@@ -39,12 +40,14 @@ class AquaAdWidget extends StatefulWidget {
   ///
   /// If not provided, uses the value set via [AquaConfig.setDefaultBaseUrl].
   /// Defaults to the Aqua Platform server if not configured.
+  @Deprecated('Use settings.baseUrl instead')
   final String? baseUrl;
 
   /// The current page URL for ad tracking.
   ///
   /// If not provided, uses the value set via [AquaConfig.setDefaultLocation].
   /// This parameter is required for proper ad tracking.
+  @Deprecated('Use settings.location instead')
   final String? location;
 
   /// The aspect ratio for the widget.
@@ -67,6 +70,12 @@ class AquaAdWidget extends StatefulWidget {
   /// with dot navigation. Defaults to 1.
   final dynamic adCount;
 
+  /// Custom settings for this widget instance.
+  ///
+  /// If provided, these settings will override the global defaults
+  /// set via [AquaConfig] for this specific widget.
+  final AquaSettings? settings;
+
   /// Creates an [AquaAdWidget].
   ///
   /// The [zoneId] parameter is required and must correspond to a valid
@@ -81,6 +90,7 @@ class AquaAdWidget extends StatefulWidget {
     this.ratio = 16 / 9,
     this.autoGrow = false,
     this.adCount = 1,
+    this.settings,
   });
 
   @override
@@ -123,8 +133,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     });
 
     try {
-      final baseUrl = widget.baseUrl ?? AquaConfig.defaultBaseUrl;
-      final location = widget.location ?? AquaConfig.defaultLocation;
+      final baseUrl = widget.settings?.baseUrl ?? widget.baseUrl ?? AquaConfig.defaultBaseUrl;
+      final location = widget.settings?.location ?? widget.location ?? AquaConfig.defaultLocation;
 
       if (location == null) {
         setState(() {
@@ -199,7 +209,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           if (!firstAd['isVideo']) {
             _startRefreshTimer();
           }
-        } else if (AquaConfig.carouselAutoAdvance) {
+        } else if (widget.settings?.carouselAutoAdvance ?? AquaConfig.carouselAutoAdvance) {
           _startCarouselTimer();
         }
       } else {
@@ -218,8 +228,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _startRefreshTimer() {
     _refreshTimer?.cancel();
-    _refreshTimer =
-        Timer(Duration(seconds: AquaConfig.imageRefreshSeconds), () {
+    final refreshSeconds = widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
+    if (refreshSeconds == false) return;
+    final seconds = refreshSeconds is bool ? 10 : refreshSeconds;
+    _refreshTimer = Timer(Duration(seconds: seconds), () {
       _loadAd();
     });
   }
@@ -229,7 +241,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (_ads.isEmpty) return;
 
     final currentAd = _ads[_currentAdIndex];
-    final duration = currentAd['isVideo'] ? 30 : AquaConfig.imageRefreshSeconds;
+    final refreshSeconds = widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
+    final imageSeconds = refreshSeconds is bool ? 30 : refreshSeconds;
+    final duration = currentAd['isVideo'] ? 30 : imageSeconds;
 
     _carouselTimer = Timer(Duration(seconds: duration), () {
       _nextSlide();
@@ -258,7 +272,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         clickUrl: ad['clickUrl'],
         onVideoEnded: _ads.length == 1
             ? _loadAd
-            : (AquaConfig.carouselAutoAdvance ? _nextSlide : null),
+            : ((widget.settings?.carouselAutoAdvance ?? AquaConfig.carouselAutoAdvance) ? _nextSlide : null),
       );
     }
 
@@ -338,7 +352,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               setState(() {
                 _currentAdIndex = index;
               });
-              if (AquaConfig.carouselAutoAdvance) {
+              if (widget.settings?.carouselAutoAdvance ?? AquaConfig.carouselAutoAdvance) {
                 _startCarouselTimer();
               }
             },

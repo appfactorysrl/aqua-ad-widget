@@ -23,8 +23,10 @@ dependencies:
 ```dart
 import 'package:aqua_ad_widget/aqua_ad_widget.dart';
 
-// Configure image refresh interval (optional)
-AquaConfig.setImageRefreshSeconds(15); // default: 10 seconds
+// Configure ad refresh interval (optional)
+AquaConfig.setDefaultAdRefreshSeconds(15); // default: 10 seconds
+// or disable auto-refresh
+AquaConfig.setDefaultAdRefreshSeconds(false);
 
 // Configure global location (required)
 AquaConfig.setDefaultLocation('https://mysite.com');
@@ -40,6 +42,12 @@ AquaAdWidget(
   ratio: 16/9, // optional, default: 16/9
   autoGrow: false, // optional, default: false
   adCount: 1, // optional, default: 1
+  settings: AquaSettings(
+    adRefreshSeconds: 20, // override global setting
+    carouselAutoAdvance: false, // override global setting
+    baseUrl: 'https://custom.server.com/asyncspc.php',
+    location: 'https://mypage.com',
+  ),
 )
 
 // Carousel with auto-detection
@@ -54,11 +62,12 @@ AquaAdWidget(
 - `zoneId`: Numeric ID of the ad zone (required)
 - `width`: Widget width (optional, default: 300)
 - `height`: Widget height (optional, default: 250)
-- `baseUrl`: Revive server base URL (optional, uses AquaConfig.setDefaultBaseUrl if not specified, default: http://servedby.aqua-adserver.com/asyncspc.php)
-- `location`: Current page URL (optional, uses AquaConfig.setDefaultLocation if not specified)
+- `baseUrl`: Revive server base URL (optional, uses AquaConfig.setDefaultBaseUrl if not specified, default: http://servedby.aqua-adserver.com/asyncspc.php) **[DEPRECATED: use settings.baseUrl]**
+- `location`: Current page URL (optional, uses AquaConfig.setDefaultLocation if not specified) **[DEPRECATED: use settings.location]**
 - `ratio`: Aspect ratio for the widget (optional, default: 16/9). Used when width is specified or when taking 100% container width
 - `autoGrow`: When true, uses the actual ad dimensions to set the aspect ratio (optional, default: false)
 - `adCount`: Number of ads to load for carousel functionality (optional, default: 1). When > 1, displays ads in a carousel with dot navigation. Use 'auto' to automatically load up to 5 ads
+- `settings`: Custom settings for this widget instance (optional). Use `AquaSettings` to override global defaults for specific widgets
 
 ## Supported Banner Types
 
@@ -70,7 +79,7 @@ Currently compatible with the following banner types:
 ## Features
 
 - **Image & Video Ads**: Automatically detects and displays both image and video advertisements
-- **Auto-refresh**: Images refresh automatically after a configurable interval, videos reload when finished
+- **Auto-refresh**: Images refresh automatically after a configurable interval (can be disabled), videos reload when finished
 - **Click Tracking**: Full click-through support with proper URL handling
 - **Global Configuration**: Set default values once for the entire app
 - **Cross-Platform**: Supports Android, iOS, Web, macOS, Linux, and Windows platforms
@@ -88,13 +97,16 @@ void main() {
   AquaConfig.setDefaultLocation('https://mywebsite.com');
   
   // Optional: Customize refresh interval (default: 10 seconds)
-  AquaConfig.setImageRefreshSeconds(15);
+  AquaConfig.setDefaultAdRefreshSeconds(15);
+  
+  // Optional: Disable auto-refresh
+  // AquaConfig.setDefaultAdRefreshSeconds(false);
   
   // Optional: Set custom Revive server URL (default: http://servedby.aqua-adserver.com/asyncspc.php)
   AquaConfig.setDefaultBaseUrl('https://ads.myserver.com/asyncspc.php');
   
   // Optional: Enable/disable carousel auto-advance (default: true)
-  AquaConfig.setCarouselAutoAdvance(true);
+  AquaConfig.setDefaultCarouselAutoAdvance(true);
   
   runApp(MyApp());
 }
