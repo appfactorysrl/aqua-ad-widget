@@ -1,6 +1,6 @@
 name: aqua_ad_widget
 description: Flutter widget for Revive Adserver integration with support for image and video ads, auto-refresh, and click tracking.
-version: 3.2.0
+version: 3.3.1
 homepage: https://github.com/appfactorysrl/aqua-ad-widget
 repository: https://github.com/appfactorysrl/aqua-ad-widget
 issue_tracker: https://github.com/appfactorysrl/aqua-ad-widget/issues
@@ -21,15 +21,15 @@ platforms:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.1.0
+  http: ^1.6.0
   url_launcher: ^6.2.4
-  video_player: ^2.8.2
+  video_player: ^2.10.1
   web: ^1.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

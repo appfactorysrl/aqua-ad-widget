@@ -7,12 +7,14 @@ class VideoAdWidget extends StatefulWidget {
   final String videoUrl;
   final String? clickUrl;
   final VoidCallback? onVideoEnded;
+  final double? borderRadius;
 
   const VideoAdWidget({
     super.key,
     required this.videoUrl,
     this.clickUrl,
     this.onVideoEnded,
+    this.borderRadius,
   });
 
   @override
@@ -41,6 +43,9 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
     _videoElement!.style.width = '100%';
     _videoElement!.style.height = '100%';
     _videoElement!.style.objectFit = 'cover';
+    if (widget.borderRadius != null) {
+      _videoElement!.style.borderRadius = '${widget.borderRadius}px';
+    }
 
     _videoElement!.onEnded.listen((_) {
       widget.onVideoEnded?.call();
@@ -58,7 +63,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    final child = Stack(
       children: [
         SizedBox.expand(
           child: HtmlElementView(
@@ -99,5 +104,12 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
         ),
       ],
     );
+    
+    return widget.borderRadius != null
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(widget.borderRadius!),
+            child: child,
+          )
+        : child;
   }
 }

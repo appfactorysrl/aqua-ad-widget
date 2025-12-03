@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "aqua_ad_widget",
-      "version": "3.1.0",
+      "version": "3.3.0",
       "dependencies": [
         "flutter",
         "http",
@@ -20,7 +20,7 @@
     },
     {
       "name": "flutter_lints",
-      "version": "3.0.2",
+      "version": "6.0.0",
       "dependencies": [
         "lints"
       ]
@@ -50,7 +50,7 @@
     },
     {
       "name": "video_player",
-      "version": "2.10.0",
+      "version": "2.10.1",
       "dependencies": [
         "flutter",
         "html",
@@ -76,7 +76,7 @@
     },
     {
       "name": "http",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "dependencies": [
         "async",
         "http_parser",
@@ -98,7 +98,7 @@
     },
     {
       "name": "lints",
-      "version": "3.0.0",
+      "version": "6.0.0",
       "dependencies": []
     },
     {

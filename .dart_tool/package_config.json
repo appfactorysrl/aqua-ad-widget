@@ -51,9 +51,9 @@
     },
     {
       "name": "flutter_lints",
-      "rootUri": "file:///Users/marco/.pub-cache/hosted/pub.dev/flutter_lints-3.0.2",
+      "rootUri": "file:///Users/marco/.pub-cache/hosted/pub.dev/flutter_lints-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.8"
     },
     {
       "name": "flutter_test",
@@ -75,7 +75,7 @@
     },
     {
       "name": "http",
-      "rootUri": "file:///Users/marco/.pub-cache/hosted/pub.dev/http-1.5.0",
+      "rootUri": "file:///Users/marco/.pub-cache/hosted/pub.dev/http-1.6.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -105,9 +105,9 @@
     },
     {
       "name": "lints",
-      "rootUri": "file:///Users/marco/.pub-cache/hosted/pub.dev/lints-3.0.0",
+      "rootUri": "file:///Users/marco/.pub-cache/hosted/pub.dev/lints-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.8"
     },
     {
       "name": "matcher",
@@ -243,9 +243,9 @@
     },
     {
       "name": "video_player",
-      "rootUri": "file:///Users/marco/.pub-cache/hosted/pub.dev/video_player-2.10.0",
+      "rootUri": "file:///Users/marco/.pub-cache/hosted/pub.dev/video_player-2.10.1",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.7"
     },
     {
       "name": "video_player_android",
@@ -293,6 +293,6 @@
   "generator": "pub",
   "generatorVersion": "3.9.2",
   "flutterRoot": "file:///opt/homebrew/share/flutter",
-  "flutterVersion": "3.35.4",
+  "flutterVersion": "3.35.5",
   "pubCache": "file:///Users/marco/.pub-cache"
 }

@@ -76,6 +76,12 @@ class AquaAdWidget extends StatefulWidget {
   /// set via [AquaConfig] for this specific widget.
   final AquaSettings? settings;
 
+  /// The border radius for the widget corners.
+  ///
+  /// If provided, the widget will have rounded corners with the specified radius.
+  /// Defaults to null (no rounded corners).
+  final double? borderRadius;
+
   /// Creates an [AquaAdWidget].
   ///
   /// The [zoneId] parameter is required and must correspond to a valid
@@ -91,6 +97,7 @@ class AquaAdWidget extends StatefulWidget {
     this.autoGrow = false,
     this.adCount = 1,
     this.settings,
+    this.borderRadius,
   });
 
   @override
@@ -133,7 +140,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     });
 
     try {
+      // ignore: deprecated_member_use_from_same_package
       final baseUrl = widget.settings?.baseUrl ?? widget.baseUrl ?? AquaConfig.defaultBaseUrl;
+      // ignore: deprecated_member_use_from_same_package
       final location = widget.settings?.location ?? widget.location ?? AquaConfig.defaultLocation;
 
       if (location == null) {
@@ -273,6 +282,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         onVideoEnded: _ads.length == 1
             ? _loadAd
             : ((widget.settings?.carouselAutoAdvance ?? AquaConfig.carouselAutoAdvance) ? _nextSlide : null),
+        borderRadius: widget.borderRadius,
       );
     }
 
@@ -281,21 +291,30 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           ? '${ad['imageUrl']}.png'
           : ad['imageUrl'];
 
+      final imageWidget = Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[300],
+            child: const Center(
+              child: Text('Pubblicità', style: TextStyle(color: Colors.grey)),
+            ),
+          );
+        },
+      );
+
+      final clippedImage = widget.borderRadius != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius!),
+              child: imageWidget,
+            )
+          : imageWidget;
+
       return GestureDetector(
         onTap:
             ad['clickUrl'] != null ? () => _handleClick(ad['clickUrl']) : null,
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: Colors.grey[300],
-              child: const Center(
-                child: Text('Pubblicità', style: TextStyle(color: Colors.grey)),
-              ),
-            );
-          },
-        ),
+        child: clippedImage,
       );
     }
 

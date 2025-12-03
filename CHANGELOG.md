@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.3.1
+
+* Fix borderRadius parameter support for mobile platforms (Android/iOS)
+* Add missing borderRadius parameter to video_ad_widget_mobile.dart
+* Ensure feature parity between web and mobile video implementations
+
+## 3.3.0
+
+* Add borderRadius parameter for rounded corners on ads
+* Apply border radius directly to video and image elements for better Safari compatibility
+* Update dependencies: http ^1.6.0, video_player ^2.10.1, flutter_lints ^6.0.0
+* Fix library name deprecation warning
+* Improve example app with dark gradient background and glass effect AppBar
+
 ## 3.2.0
 
 * Add AquaSettings class for per-widget configuration

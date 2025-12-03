@@ -42,6 +42,7 @@ AquaAdWidget(
   ratio: 16/9, // optional, default: 16/9
   autoGrow: false, // optional, default: false
   adCount: 1, // optional, default: 1
+  borderRadius: 12, // optional, rounded corners in pixels
   settings: AquaSettings(
     adRefreshSeconds: 20, // override global setting
     carouselAutoAdvance: false, // override global setting
@@ -50,10 +51,11 @@ AquaAdWidget(
   ),
 )
 
-// Carousel with auto-detection
+// Carousel with auto-detection and rounded corners
 AquaAdWidget(
   zoneId: 123,
   adCount: 'auto', // loads up to 5 ads automatically
+  borderRadius: 20, // rounded corners
 )
 ```
 
@@ -67,6 +69,7 @@ AquaAdWidget(
 - `ratio`: Aspect ratio for the widget (optional, default: 16/9). Used when width is specified or when taking 100% container width
 - `autoGrow`: When true, uses the actual ad dimensions to set the aspect ratio (optional, default: false)
 - `adCount`: Number of ads to load for carousel functionality (optional, default: 1). When > 1, displays ads in a carousel with dot navigation. Use 'auto' to automatically load up to 5 ads
+- `borderRadius`: Border radius for rounded corners in pixels (optional, default: null). Applies to both image and video ads
 - `settings`: Custom settings for this widget instance (optional). Use `AquaSettings` to override global defaults for specific widgets
 
 ## Supported Banner Types
@@ -81,6 +84,7 @@ Currently compatible with the following banner types:
 - **Image & Video Ads**: Automatically detects and displays both image and video advertisements
 - **Auto-refresh**: Images refresh automatically after a configurable interval (can be disabled), videos reload when finished
 - **Click Tracking**: Full click-through support with proper URL handling
+- **Rounded Corners**: Optional border radius for modern UI design
 - **Global Configuration**: Set default values once for the entire app
 - **Cross-Platform**: Supports Android, iOS, Web, macOS, Linux, and Windows platforms
 - **Web Optimized**: Built specifically for Flutter web with HTML video support

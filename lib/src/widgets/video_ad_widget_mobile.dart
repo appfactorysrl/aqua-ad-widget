@@ -6,12 +6,14 @@ class VideoAdWidget extends StatefulWidget {
   final String videoUrl;
   final String? clickUrl;
   final VoidCallback? onVideoEnded;
+  final double? borderRadius;
 
   const VideoAdWidget({
     super.key,
     required this.videoUrl,
     this.clickUrl,
     this.onVideoEnded,
+    this.borderRadius,
   });
 
   @override
@@ -53,22 +55,31 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final videoPlayer = _controller.value.isInitialized
+        ? ClipRect(
+            child: SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
+                ),
+              ),
+            ),
+          )
+        : const Center(child: CircularProgressIndicator());
+
+    final clippedVideo = widget.borderRadius != null
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(widget.borderRadius!),
+            child: videoPlayer,
+          )
+        : videoPlayer;
+
     return Stack(
       children: [
-        _controller.value.isInitialized
-            ? ClipRect(
-                child: SizedBox.expand(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: _controller.value.size.width,
-                      height: _controller.value.size.height,
-                      child: VideoPlayer(_controller),
-                    ),
-                  ),
-                ),
-              )
-            : const Center(child: CircularProgressIndicator()),
+        clippedVideo,
         if (widget.clickUrl != null)
           Positioned.fill(
             child: GestureDetector(
