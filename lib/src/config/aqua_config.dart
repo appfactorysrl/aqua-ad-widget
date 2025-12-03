@@ -12,7 +12,8 @@ class AquaConfig {
   static bool _carouselAutoAdvance = true;
 
   /// Gets the current image refresh interval in seconds.
-  static int get imageRefreshSeconds => _adRefreshSeconds is bool ? 10 : _adRefreshSeconds;
+  static int get imageRefreshSeconds =>
+      _adRefreshSeconds is bool ? 10 : _adRefreshSeconds;
 
   /// Gets the current ad refresh interval in seconds or false if disabled.
   static dynamic get adRefreshSeconds => _adRefreshSeconds;

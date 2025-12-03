@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.2
+
+* Maintenance release
+
 ## 3.3.1
 
 * Fix borderRadius parameter support for mobile platforms (Android/iOS)

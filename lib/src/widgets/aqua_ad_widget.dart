@@ -141,9 +141,13 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
     try {
       // ignore: deprecated_member_use_from_same_package
-      final baseUrl = widget.settings?.baseUrl ?? widget.baseUrl ?? AquaConfig.defaultBaseUrl;
+      final baseUrl = widget.settings?.baseUrl ??
+          widget.baseUrl ??
+          AquaConfig.defaultBaseUrl;
       // ignore: deprecated_member_use_from_same_package
-      final location = widget.settings?.location ?? widget.location ?? AquaConfig.defaultLocation;
+      final location = widget.settings?.location ??
+          widget.location ??
+          AquaConfig.defaultLocation;
 
       if (location == null) {
         setState(() {
@@ -218,7 +222,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           if (!firstAd['isVideo']) {
             _startRefreshTimer();
           }
-        } else if (widget.settings?.carouselAutoAdvance ?? AquaConfig.carouselAutoAdvance) {
+        } else if (widget.settings?.carouselAutoAdvance ??
+            AquaConfig.carouselAutoAdvance) {
           _startCarouselTimer();
         }
       } else {
@@ -237,7 +242,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _startRefreshTimer() {
     _refreshTimer?.cancel();
-    final refreshSeconds = widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
+    final refreshSeconds =
+        widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
     if (refreshSeconds == false) return;
     final seconds = refreshSeconds is bool ? 10 : refreshSeconds;
     _refreshTimer = Timer(Duration(seconds: seconds), () {
@@ -250,7 +256,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (_ads.isEmpty) return;
 
     final currentAd = _ads[_currentAdIndex];
-    final refreshSeconds = widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
+    final refreshSeconds =
+        widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
     final imageSeconds = refreshSeconds is bool ? 30 : refreshSeconds;
     final duration = currentAd['isVideo'] ? 30 : imageSeconds;
 
@@ -281,7 +288,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         clickUrl: ad['clickUrl'],
         onVideoEnded: _ads.length == 1
             ? _loadAd
-            : ((widget.settings?.carouselAutoAdvance ?? AquaConfig.carouselAutoAdvance) ? _nextSlide : null),
+            : ((widget.settings?.carouselAutoAdvance ??
+                    AquaConfig.carouselAutoAdvance)
+                ? _nextSlide
+                : null),
         borderRadius: widget.borderRadius,
       );
     }
@@ -371,7 +381,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               setState(() {
                 _currentAdIndex = index;
               });
-              if (widget.settings?.carouselAutoAdvance ?? AquaConfig.carouselAutoAdvance) {
+              if (widget.settings?.carouselAutoAdvance ??
+                  AquaConfig.carouselAutoAdvance) {
                 _startCarouselTimer();
               }
             },

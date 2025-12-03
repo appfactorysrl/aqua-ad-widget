@@ -104,7 +104,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
         ),
       ],
     );
-    
+
     return widget.borderRadius != null
         ? ClipRRect(
             borderRadius: BorderRadius.circular(widget.borderRadius!),
