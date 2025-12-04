@@ -5,6 +5,7 @@ import 'dart:async';
 import '../config/aqua_config.dart';
 import '../config/aqua_settings.dart';
 import '../utils/url_launcher.dart';
+import '../localization/aqua_localizations.dart';
 import 'video_ad_widget.dart';
 
 /// A Flutter widget that displays advertisements from Revive AdServer or Aqua Platform.
@@ -116,11 +117,22 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   int _currentAdIndex = 0;
   final PageController _pageController = PageController();
   Timer? _carouselTimer;
+  late AquaLocalizations _localizations;
+  int? _detectedAdCount;
 
   @override
   void initState() {
     super.initState();
     _loadAd();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = widget.settings?.locale ?? 
+                   (AquaConfig.defaultLocale != 'en' ? AquaConfig.defaultLocale : 
+                   Localizations.localeOf(context).languageCode);
+    _localizations = AquaLocalizations(locale);
   }
 
   @override
@@ -151,15 +163,15 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
       if (location == null) {
         setState(() {
-          _error =
-              'Location non configurata. Usa AquaConfig.setDefaultLocation()';
+          _error = _localizations.locationNotConfigured;
           _isLoading = false;
         });
         return;
       }
 
-      final int requestCount =
-          widget.adCount == 'auto' ? 5 : widget.adCount as int;
+      final int requestCount = widget.adCount == 'auto'
+          ? (_detectedAdCount ?? 5)
+          : widget.adCount as int;
       final zones =
           List.filled(requestCount, widget.zoneId.toString()).join('|');
       final response = await http.get(
@@ -211,14 +223,24 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           }
         }
 
+        // Limita a massimo 5 annunci se adCount è 'auto'
+        final adsToShow = widget.adCount == 'auto' && loadedAds.length > 5
+            ? loadedAds.sublist(0, 5)
+            : loadedAds;
+
+        // Se adCount è 'auto', memorizza il numero effettivo di annunci ricevuti
+        if (widget.adCount == 'auto' && _detectedAdCount == null) {
+          _detectedAdCount = adsToShow.length;
+        }
+
         setState(() {
-          _ads = loadedAds;
+          _ads = adsToShow;
           _currentAdIndex = 0;
           _isLoading = false;
         });
 
-        if (loadedAds.length == 1) {
-          final firstAd = loadedAds[0];
+        if (adsToShow.length == 1) {
+          final firstAd = adsToShow[0];
           if (!firstAd['isVideo']) {
             _startRefreshTimer();
           }
@@ -228,13 +250,13 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         }
       } else {
         setState(() {
-          _error = 'Nessuna pubblicità disponibile';
+          _error = _localizations.noAds;
           _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _error = 'Errore di connessione';
+        _error = _localizations.connectionError;
         _isLoading = false;
       });
     }
@@ -307,8 +329,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         errorBuilder: (context, error, stackTrace) {
           return Container(
             color: Colors.grey[300],
-            child: const Center(
-              child: Text('Pubblicità', style: TextStyle(color: Colors.grey)),
+            child: Center(
+              child: Text(_localizations.advertisement, style: const TextStyle(color: Colors.grey)),
             ),
           );
         },
@@ -350,15 +372,25 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final hideIfEmpty = widget.settings?.hideIfEmpty ?? AquaConfig.hideIfEmpty;
+
     if (_isLoading) {
+      if (hideIfEmpty) return const SizedBox.shrink();
       return _buildSizedContainer(
-        child: const Center(child: CircularProgressIndicator()),
+        child: Container(
+          color: Colors.white,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
       );
     }
 
     if (_error != null) {
+      if (hideIfEmpty) return const SizedBox.shrink();
       return _buildSizedContainer(
-        child: Center(child: Text(_error!)),
+        child: Container(
+          color: Colors.white,
+          child: Center(child: Text(_error!)),
+        ),
       );
     }
 

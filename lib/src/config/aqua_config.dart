@@ -10,6 +10,8 @@ class AquaConfig {
   static String _defaultBaseUrl =
       'http://servedby.aqua-adserver.com/asyncspc.php';
   static bool _carouselAutoAdvance = true;
+  static String _defaultLocale = 'en';
+  static bool _hideIfEmpty = false;
 
   /// Gets the current image refresh interval in seconds.
   static int get imageRefreshSeconds =>
@@ -26,6 +28,12 @@ class AquaConfig {
 
   /// Gets whether carousel auto-advance is enabled.
   static bool get carouselAutoAdvance => _carouselAutoAdvance;
+
+  /// Gets the default locale for error messages.
+  static String get defaultLocale => _defaultLocale;
+
+  /// Gets whether to hide the widget when no ads are available.
+  static bool get hideIfEmpty => _hideIfEmpty;
 
   /// Sets the refresh interval for image advertisements.
   ///
@@ -77,5 +85,21 @@ class AquaConfig {
   /// Default is true.
   static void setDefaultCarouselAutoAdvance(bool enabled) {
     _carouselAutoAdvance = enabled;
+  }
+
+  /// Sets the default locale for error messages.
+  ///
+  /// [locale] should be a language code (e.g., 'en', 'it', 'es', 'fr', 'de').
+  /// Default is 'en'.
+  static void setDefaultLocale(String locale) {
+    _defaultLocale = locale;
+  }
+
+  /// Sets whether to hide the widget when no ads are available.
+  ///
+  /// [hide] controls if the widget should be completely hidden (no space occupied)
+  /// when loading or when no ads are available. Default is false.
+  static void setDefaultHideIfEmpty(bool hide) {
+    _hideIfEmpty = hide;
   }
 }

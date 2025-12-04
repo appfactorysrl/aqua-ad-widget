@@ -23,11 +23,23 @@ class AquaSettings {
   /// If null, uses global default.
   final String? location;
 
+  /// The locale for error messages.
+  ///
+  /// If null, uses global default.
+  final String? locale;
+
+  /// Whether to hide the widget when no ads are available.
+  ///
+  /// If null, uses global default.
+  final bool? hideIfEmpty;
+
   /// Creates an [AquaSettings] instance.
   const AquaSettings({
     this.adRefreshSeconds,
     this.carouselAutoAdvance,
     this.baseUrl,
     this.location,
+    this.locale,
+    this.hideIfEmpty,
   });
 }

@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^3.0.0
+  aqua_ad_widget: ^3.4.0
 ```
 
 ## Usage
@@ -34,6 +34,12 @@ AquaConfig.setDefaultLocation('https://mysite.com');
 // Configure server URL (optional, default: http://servedby.aqua-adserver.com/asyncspc.php)
 AquaConfig.setDefaultBaseUrl('https://myserver.com/asyncspc.php');
 
+// Configure locale (optional, default: auto-detect from device/browser)
+AquaConfig.setDefaultLocale('en'); // 'en', 'it', 'es', 'fr', 'de'
+
+// Configure hide behavior (optional, default: false)
+AquaConfig.setDefaultHideIfEmpty(true); // hide widget when no ads available
+
 // Display an ad
 AquaAdWidget(
   zoneId: 123,
@@ -48,6 +54,8 @@ AquaAdWidget(
     carouselAutoAdvance: false, // override global setting
     baseUrl: 'https://custom.server.com/asyncspc.php',
     location: 'https://mypage.com',
+    locale: 'it', // override global locale
+    hideIfEmpty: true, // override global hide behavior
   ),
 )
 
@@ -71,6 +79,12 @@ AquaAdWidget(
 - `adCount`: Number of ads to load for carousel functionality (optional, default: 1). When > 1, displays ads in a carousel with dot navigation. Use 'auto' to automatically load up to 5 ads
 - `borderRadius`: Border radius for rounded corners in pixels (optional, default: null). Applies to both image and video ads
 - `settings`: Custom settings for this widget instance (optional). Use `AquaSettings` to override global defaults for specific widgets
+  - `adRefreshSeconds`: Override refresh interval
+  - `carouselAutoAdvance`: Override carousel auto-advance
+  - `baseUrl`: Override server URL
+  - `location`: Override tracking location
+  - `locale`: Override language ('en', 'it', 'es', 'fr', 'de')
+  - `hideIfEmpty`: Override hide behavior when no ads available
 
 ## Supported Banner Types
 
@@ -90,6 +104,8 @@ Currently compatible with the following banner types:
 - **Web Optimized**: Built specifically for Flutter web with HTML video support
 - **Audio Controls**: Video ads include mute/unmute button overlay
 - **Carousel Auto-Advance**: Configurable automatic slide progression in carousels
+- **Multi-Language Support**: Automatic locale detection with support for 5 languages (EN, IT, ES, FR, DE)
+- **Hide When Empty**: Optional configuration to hide widget completely when no ads available
 
 ## Configuration
 
@@ -112,8 +128,52 @@ void main() {
   // Optional: Enable/disable carousel auto-advance (default: true)
   AquaConfig.setDefaultCarouselAutoAdvance(true);
   
+  // Optional: Set default locale (default: auto-detect from device/browser)
+  AquaConfig.setDefaultLocale('en'); // Supported: 'en', 'it', 'es', 'fr', 'de'
+  
+  // Optional: Hide widget when no ads available (default: false)
+  AquaConfig.setDefaultHideIfEmpty(true);
+  
   runApp(MyApp());
 }
+```
+
+## Localization
+
+The widget automatically detects the device/browser language and displays error messages in the appropriate language. Supported languages:
+
+- **English** (en) - default
+- **Italian** (it)
+- **Spanish** (es)
+- **French** (fr)
+- **German** (de)
+
+You can override the language globally or per widget:
+
+```dart
+// Global configuration
+AquaConfig.setDefaultLocale('it');
+
+// Per-widget override
+AquaAdWidget(
+  zoneId: 123,
+  settings: AquaSettings(locale: 'es'),
+)
+```
+
+## Hide When Empty
+
+By default, the widget shows a white background during loading and when no ads are available. You can configure it to hide completely (no space occupied):
+
+```dart
+// Global configuration
+AquaConfig.setDefaultHideIfEmpty(true);
+
+// Per-widget override
+AquaAdWidget(
+  zoneId: 123,
+  settings: AquaSettings(hideIfEmpty: true),
+)
 ```
 
 ### Finding Your Server URL

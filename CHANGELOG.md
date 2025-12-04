@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.4.0
+
+* Add multi-language support (English, Italian, Spanish, French, German)
+* Add automatic locale detection from device/browser
+* Add `hideIfEmpty` configuration to hide widget when no ads available
+* Add `locale` parameter to AquaSettings for per-widget language override
+* Add `setDefaultLocale()` and `setDefaultHideIfEmpty()` to AquaConfig
+* Improve `adCount: 'auto'` to adapt to actual number of ads received
+* Optimize auto mode to request only detected ad count after first load
+* Add white background to loading and error states
+* Export AquaLocalizations class for public use
+* Fix single ad behavior in auto mode (no carousel, proper refresh)
+
 ## 3.3.2
 
 * Maintenance release
