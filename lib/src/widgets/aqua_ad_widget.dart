@@ -135,7 +135,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('🌍 didChangeDependencies() called');
     _initializeLocalization();
   }
 
@@ -148,7 +147,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (_currentLocale != locale) {
       _currentLocale = locale;
       _localizations = AquaLocalizations(locale);
-      print('🌍 Locale changed to: $locale');
     }
   }
 
@@ -161,11 +159,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   }
 
   Future<void> _loadAd() async {
-    print('🔄 _loadAd() called - adCount: ${widget.adCount}, detectedAdCount: $_detectedAdCount');
-    
     // Previeni chiamate multiple simultanee
     if (_isLoadingAd) {
-      print('⚠️ _loadAd() already in progress, skipping');
       return;
     }
     
@@ -405,12 +400,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print('🏗️ build() called - isLoading: $_isLoading, error: $_error, ads: ${_ads.length}');
     final hideIfEmpty = widget.settings?.hideIfEmpty ?? AquaConfig.hideIfEmpty;
 
     if (_isLoading) {
       if (hideIfEmpty) {
-        print('🚫 Hiding widget during loading (hideIfEmpty=true)');
         return const SizedBox.shrink();
       }
       return _buildSizedContainer(
@@ -423,7 +416,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
     if (_error != null) {
       if (hideIfEmpty) {
-        print('🚫 Hiding widget due to error (hideIfEmpty=true): $_error');
         return const SizedBox.shrink();
       }
       return _buildSizedContainer(
@@ -435,7 +427,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     }
 
     if (_ads.isEmpty) {
-      print('📭 No ads to show');
       return const SizedBox.shrink();
     }
 

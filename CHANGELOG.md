@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.4.1
+
+* Fix infinite loop issue caused by didChangeDependencies cycles
+* Fix context access error in initState() for locale detection
+* Add protection against multiple simultaneous loadAd calls
+* Improve locale caching to prevent unnecessary reinitializations
+* Add early returns to prevent timer starts on errors
+* Enhance error handling and debugging capabilities
+* Add debug page for troubleshooting widget behavior
+
 ## 3.4.0
 
 * Add multi-language support (English, Italian, Spanish, French, German)
