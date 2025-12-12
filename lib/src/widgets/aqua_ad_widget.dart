@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
@@ -121,6 +122,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   int? _detectedAdCount;
   String? _currentLocale;
   bool _isLoadingAd = false;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -292,12 +294,17 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _startRefreshTimer() {
     _refreshTimer?.cancel();
+    // Non avviare timer se c'è un errore permanente
+    if (_hasError) return;
+    
     final refreshSeconds =
         widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
     if (refreshSeconds == false) return;
     final seconds = refreshSeconds is bool ? 10 : refreshSeconds;
     _refreshTimer = Timer(Duration(seconds: seconds), () {
-      _loadAd();
+      if (!_hasError) {
+        _loadAd();
+      }
     });
   }
 
@@ -355,6 +362,15 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         imageUrl,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
+          // Marca come errore permanente per evitare loop
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _hasError = true;
+                _error = 'Errore caricamento immagine';
+              });
+            }
+          });
           return Container(
             color: Colors.grey[300],
             child: Center(
@@ -414,14 +430,14 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       );
     }
 
-    if (_error != null) {
+    if (_error != null || _hasError) {
       if (hideIfEmpty) {
         return const SizedBox.shrink();
       }
       return _buildSizedContainer(
         child: Container(
           color: Colors.white,
-          child: Center(child: Text(_error!)),
+          child: Center(child: Text(_error ?? 'Errore')),
         ),
       );
     }

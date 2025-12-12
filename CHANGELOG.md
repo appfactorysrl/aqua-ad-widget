@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.4.2
+
+* Fix infinite loop caused by image loading errors
+* Add permanent error state to prevent continuous reload attempts
+* Improve error handling with SchedulerBinding for safe setState calls
+* Add comprehensive protection against timer restarts on errors
+* Remove debug print statements for production release
+* Enhance stability when ads fail to load or display
+
 ## 3.4.1
 
 * Fix infinite loop issue caused by didChangeDependencies cycles
