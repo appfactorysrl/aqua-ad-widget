@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:aqua_ad_widget/aqua_ad_widget.dart';
+import 'debug_page.dart';
 
 void main() {
   // Configurazioni globali della libreria
@@ -43,6 +44,17 @@ class HomePage extends StatelessWidget {
         ),
         title: const Text('Aqua Platform Test',
             style: TextStyle(color: Colors.white)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DebugPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: SizedBox(
         width: double.infinity,

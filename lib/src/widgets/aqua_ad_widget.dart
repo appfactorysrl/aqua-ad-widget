@@ -119,20 +119,37 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   Timer? _carouselTimer;
   late AquaLocalizations _localizations;
   int? _detectedAdCount;
+  String? _currentLocale;
+  bool _isLoadingAd = false;
 
   @override
   void initState() {
     super.initState();
+    // Inizializza con locale di default, sarà aggiornato in didChangeDependencies
+    final defaultLocale = widget.settings?.locale ?? AquaConfig.defaultLocale;
+    _currentLocale = defaultLocale;
+    _localizations = AquaLocalizations(defaultLocale);
     _loadAd();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    print('🌍 didChangeDependencies() called');
+    _initializeLocalization();
+  }
+
+  void _initializeLocalization() {
     final locale = widget.settings?.locale ?? 
                    (AquaConfig.defaultLocale != 'en' ? AquaConfig.defaultLocale : 
                    Localizations.localeOf(context).languageCode);
-    _localizations = AquaLocalizations(locale);
+    
+    // Solo reinizializza se il locale è cambiato
+    if (_currentLocale != locale) {
+      _currentLocale = locale;
+      _localizations = AquaLocalizations(locale);
+      print('🌍 Locale changed to: $locale');
+    }
   }
 
   @override
@@ -144,6 +161,15 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   }
 
   Future<void> _loadAd() async {
+    print('🔄 _loadAd() called - adCount: ${widget.adCount}, detectedAdCount: $_detectedAdCount');
+    
+    // Previeni chiamate multiple simultanee
+    if (_isLoadingAd) {
+      print('⚠️ _loadAd() already in progress, skipping');
+      return;
+    }
+    
+    _isLoadingAd = true;
     _refreshTimer?.cancel();
 
     setState(() {
@@ -238,6 +264,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _currentAdIndex = 0;
           _isLoading = false;
         });
+        _isLoadingAd = false;
 
         if (adsToShow.length == 1) {
           final firstAd = adsToShow[0];
@@ -253,12 +280,18 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _error = _localizations.noAds;
           _isLoading = false;
         });
+        _isLoadingAd = false;
+        // Non avviare timer se non ci sono annunci
+        return;
       }
     } catch (e) {
       setState(() {
         _error = _localizations.connectionError;
         _isLoading = false;
       });
+      _isLoadingAd = false;
+      // Non avviare timer in caso di errore
+      return;
     }
   }
 
@@ -372,10 +405,14 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print('🏗️ build() called - isLoading: $_isLoading, error: $_error, ads: ${_ads.length}');
     final hideIfEmpty = widget.settings?.hideIfEmpty ?? AquaConfig.hideIfEmpty;
 
     if (_isLoading) {
-      if (hideIfEmpty) return const SizedBox.shrink();
+      if (hideIfEmpty) {
+        print('🚫 Hiding widget during loading (hideIfEmpty=true)');
+        return const SizedBox.shrink();
+      }
       return _buildSizedContainer(
         child: Container(
           color: Colors.white,
@@ -385,7 +422,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     }
 
     if (_error != null) {
-      if (hideIfEmpty) return const SizedBox.shrink();
+      if (hideIfEmpty) {
+        print('🚫 Hiding widget due to error (hideIfEmpty=true): $_error');
+        return const SizedBox.shrink();
+      }
       return _buildSizedContainer(
         child: Container(
           color: Colors.white,
@@ -395,6 +435,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     }
 
     if (_ads.isEmpty) {
+      print('📭 No ads to show');
       return const SizedBox.shrink();
     }
 
