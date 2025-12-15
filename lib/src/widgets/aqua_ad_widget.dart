@@ -166,6 +166,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       return;
     }
     
+    if (_hasError) {
+      return;
+    }
+    
     _isLoadingAd = true;
     _refreshTimer?.cancel();
 
@@ -294,13 +298,17 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _startRefreshTimer() {
     _refreshTimer?.cancel();
+    
     // Non avviare timer se c'è un errore permanente
     if (_hasError) return;
     
     final refreshSeconds =
         widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
     if (refreshSeconds == false) return;
-    final seconds = refreshSeconds is bool ? 10 : refreshSeconds;
+    
+    final seconds = refreshSeconds is bool ? 10 : (refreshSeconds as int);
+    if (seconds <= 0) return;
+    
     _refreshTimer = Timer(Duration(seconds: seconds), () {
       if (!_hasError) {
         _loadAd();

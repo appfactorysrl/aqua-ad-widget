@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.4.3
+
+* Fix critical timer bug causing 0-second refresh intervals
+* Improve refresh timer validation to prevent invalid intervals
+* Fix type casting issue in adRefreshSeconds parameter handling
+* Add protection against negative or zero timer values
+* Remove debug logging for production release
+
 ## 3.4.2
 
 * Fix infinite loop caused by image loading errors
