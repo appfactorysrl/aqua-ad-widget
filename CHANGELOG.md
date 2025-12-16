@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.4
+
+* Add pointer cursor (hand) on web when banner has click URL
+* Improve user experience with visual feedback for clickable ads
+* Apply cursor change to both image and video ads
+
 ## 3.4.3
 
 * Fix critical timer bug causing 0-second refresh intervals

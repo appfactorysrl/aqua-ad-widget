@@ -395,10 +395,13 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             )
           : imageWidget;
 
-      return GestureDetector(
-        onTap:
-            ad['clickUrl'] != null ? () => _handleClick(ad['clickUrl']) : null,
-        child: clippedImage,
+      return MouseRegion(
+        cursor: ad['clickUrl'] != null ? SystemMouseCursors.click : MouseCursor.defer,
+        child: GestureDetector(
+          onTap:
+              ad['clickUrl'] != null ? () => _handleClick(ad['clickUrl']) : null,
+          child: clippedImage,
+        ),
       );
     }
 

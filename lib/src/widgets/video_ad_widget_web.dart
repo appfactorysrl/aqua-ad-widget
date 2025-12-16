@@ -73,9 +73,12 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
         ),
         if (widget.clickUrl != null)
           Positioned.fill(
-            child: GestureDetector(
-              onTap: () => launchURL(widget.clickUrl!),
-              child: Container(color: Colors.transparent),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => launchURL(widget.clickUrl!),
+                child: Container(color: Colors.transparent),
+              ),
             ),
           ),
         Positioned(
