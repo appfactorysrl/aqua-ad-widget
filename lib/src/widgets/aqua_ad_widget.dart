@@ -110,11 +110,13 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   bool _isLoading = true;
   String? _error;
   Timer? _refreshTimer;
+  Timer? _preloadTimer;
   double? _adWidth;
   double? _adHeight;
   double? _currentRatio;
 
   List<Map<String, dynamic>> _ads = [];
+  List<Map<String, dynamic>>? _preloadedAds;
   int _currentAdIndex = 0;
   final PageController _pageController = PageController();
   Timer? _carouselTimer;
@@ -155,6 +157,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _preloadTimer?.cancel();
     _carouselTimer?.cancel();
     _pageController.dispose();
     super.dispose();
@@ -298,6 +301,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _startRefreshTimer() {
     _refreshTimer?.cancel();
+    _preloadTimer?.cancel();
     
     // Non avviare timer se c'è un errore permanente
     if (_hasError) return;
@@ -307,11 +311,27 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (refreshSeconds == false) return;
     
     final seconds = refreshSeconds is bool ? 10 : (refreshSeconds as int);
-    if (seconds <= 0) return;
+    if (seconds <= 5) {
+      // Se il refresh è troppo veloce, usa il metodo tradizionale
+      _refreshTimer = Timer(Duration(seconds: seconds), () {
+        if (!_hasError) {
+          _loadAd();
+        }
+      });
+      return;
+    }
     
+    // Avvia precaricamento 5 secondi prima del cambio
+    _preloadTimer = Timer(Duration(seconds: seconds - 5), () {
+      if (!_hasError) {
+        _preloadNextAd();
+      }
+    });
+    
+    // Timer principale per il cambio effettivo
     _refreshTimer = Timer(Duration(seconds: seconds), () {
       if (!_hasError) {
-        _loadAd();
+        _switchToPreloadedAd();
       }
     });
   }
@@ -340,6 +360,98 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  Future<void> _preloadNextAd() async {
+    if (_isLoadingAd) return;
+    
+    try {
+      // ignore: deprecated_member_use_from_same_package
+      final baseUrl = widget.settings?.baseUrl ??
+          widget.baseUrl ??
+          AquaConfig.defaultBaseUrl;
+      // ignore: deprecated_member_use_from_same_package
+      final location = widget.settings?.location ??
+          widget.location ??
+          AquaConfig.defaultLocation;
+
+      if (location == null) return;
+
+      final int requestCount = widget.adCount == 'auto'
+          ? (_detectedAdCount ?? 5)
+          : widget.adCount as int;
+      final zones =
+          List.filled(requestCount, widget.zoneId.toString()).join('|');
+      final response = await http.get(
+        Uri.parse('$baseUrl?zones=$zones&loc=$location'),
+      );
+
+      final List<Map<String, dynamic>> loadedAds = [];
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List<dynamic>;
+
+        for (final adData in data) {
+          final width = int.tryParse(adData['width'].toString()) ?? 0;
+          final height = int.tryParse(adData['height'].toString()) ?? 0;
+
+          if (width == 0 || height == 0) continue;
+
+          final htmlContent = adData['html'] as String;
+
+          final videoMatch =
+              RegExp(r'<source src=\"([^\"]+)\"').firstMatch(htmlContent);
+          final imageMatch = RegExp(r"src='([^']+)'").firstMatch(htmlContent);
+          final linkMatch = videoMatch != null
+              ? RegExp(r'<a href=\"([^\"]+)\"').firstMatch(htmlContent)
+              : RegExp(r"href='([^']+)'").firstMatch(htmlContent);
+
+          if (videoMatch != null || imageMatch != null) {
+            loadedAds.add({
+              'html': htmlContent,
+              'width': adData['width'],
+              'height': adData['height'],
+              'videoUrl': videoMatch?.group(1),
+              'imageUrl': imageMatch?.group(1),
+              'clickUrl': linkMatch?.group(1),
+              'isVideo': videoMatch != null,
+            });
+          }
+        }
+      }
+
+      if (loadedAds.isNotEmpty) {
+        final adsToShow = widget.adCount == 'auto' && loadedAds.length > 5
+            ? loadedAds.sublist(0, 5)
+            : loadedAds;
+        _preloadedAds = adsToShow;
+      }
+    } catch (e) {
+      // Ignora errori di precaricamento
+    }
+  }
+
+  void _switchToPreloadedAd() {
+    if (_preloadedAds != null && _preloadedAds!.isNotEmpty) {
+      setState(() {
+        _ads = _preloadedAds!;
+        _currentAdIndex = 0;
+        _preloadedAds = null;
+      });
+      
+      if (_ads.length == 1) {
+        final firstAd = _ads[0];
+        if (!firstAd['isVideo']) {
+          _startRefreshTimer();
+        }
+      } else if (widget.settings?.carouselAutoAdvance ??
+          AquaConfig.carouselAutoAdvance) {
+        _startCarouselTimer();
+      }
+    } else {
+      // Fallback al caricamento tradizionale se il precaricamento fallisce
+      _loadAd();
+    }
   }
 
   Future<void> _handleClick(String url) async {
