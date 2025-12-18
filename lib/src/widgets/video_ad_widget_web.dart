@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 import 'dart:ui_web' as ui_web;
+import 'dart:async';
 import '../utils/url_launcher.dart';
 
 class VideoAdWidget extends StatefulWidget {
@@ -8,6 +9,7 @@ class VideoAdWidget extends StatefulWidget {
   final String? clickUrl;
   final VoidCallback? onVideoEnded;
   final double? borderRadius;
+  final ValueChanged<double>? onProgressChanged;
 
   const VideoAdWidget({
     super.key,
@@ -15,6 +17,7 @@ class VideoAdWidget extends StatefulWidget {
     this.clickUrl,
     this.onVideoEnded,
     this.borderRadius,
+    this.onProgressChanged,
   });
 
   @override
@@ -25,6 +28,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   bool _isMuted = true;
   web.HTMLVideoElement? _videoElement;
   late String _viewType;
+  Timer? _progressTimer;
 
   @override
   void initState() {
@@ -53,12 +57,29 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
     _videoElement!.onLoadedData.listen((_) {
       _videoElement!.play();
+      _startProgressTracking();
     });
 
     ui_web.platformViewRegistry.registerViewFactory(
       _viewType,
       (int viewId) => _videoElement!,
     );
+  }
+  
+  void _startProgressTracking() {
+    _progressTimer?.cancel();
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (_videoElement != null && _videoElement!.duration > 0) {
+        final progress = _videoElement!.currentTime / _videoElement!.duration;
+        widget.onProgressChanged?.call(progress.clamp(0.0, 1.0));
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    _progressTimer?.cancel();
+    super.dispose();
   }
 
   @override

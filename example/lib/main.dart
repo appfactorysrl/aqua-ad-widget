@@ -87,6 +87,8 @@ class HomePage extends StatelessWidget {
                   ratio: 16 / 9,
                   borderRadius: 12,
                   adCount: 'auto',
+                  showProgressBar: true,
+                  progressBarColor: Colors.white,
                   settings: AquaSettings(
                     hideIfEmpty: true,
                   ),

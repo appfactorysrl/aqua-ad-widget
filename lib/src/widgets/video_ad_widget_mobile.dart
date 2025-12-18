@@ -7,6 +7,7 @@ class VideoAdWidget extends StatefulWidget {
   final String? clickUrl;
   final VoidCallback? onVideoEnded;
   final double? borderRadius;
+  final ValueChanged<double>? onProgressChanged;
 
   const VideoAdWidget({
     super.key,
@@ -14,6 +15,7 @@ class VideoAdWidget extends StatefulWidget {
     this.clickUrl,
     this.onVideoEnded,
     this.borderRadius,
+    this.onProgressChanged,
   });
 
   @override
@@ -43,6 +45,13 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
     if (_hasStarted &&
         _controller.value.position >= _controller.value.duration) {
       widget.onVideoEnded?.call();
+    }
+    
+    // Aggiorna progresso
+    if (_controller.value.duration.inMilliseconds > 0) {
+      final progress = _controller.value.position.inMilliseconds / 
+                      _controller.value.duration.inMilliseconds;
+      widget.onProgressChanged?.call(progress.clamp(0.0, 1.0));
     }
   }
 

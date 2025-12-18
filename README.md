@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^3.4.4
+  aqua_ad_widget: ^4.0.0
 ```
 
 ## Usage
@@ -65,6 +65,13 @@ AquaAdWidget(
   adCount: 'auto', // loads up to 5 ads automatically
   borderRadius: 20, // rounded corners
 )
+
+// Widget with progress bar
+AquaAdWidget(
+  zoneId: 123,
+  showProgressBar: true, // show progress bar
+  progressBarColor: Colors.blue, // custom color
+)
 ```
 
 ## Parameters
@@ -78,6 +85,8 @@ AquaAdWidget(
 - `autoGrow`: When true, uses the actual ad dimensions to set the aspect ratio (optional, default: false)
 - `adCount`: Number of ads to load for carousel functionality (optional, default: 1). When > 1, displays ads in a carousel with dot navigation. Use 'auto' to automatically load up to 5 ads
 - `borderRadius`: Border radius for rounded corners in pixels (optional, default: null). Applies to both image and video ads
+- `showProgressBar`: Whether to show the progress bar (optional, default: false). Displays a progress bar at the bottom of the widget
+- `progressBarColor`: The color of the progress bar (optional, default: Colors.white). Customizable progress bar color
 - `settings`: Custom settings for this widget instance (optional). Use `AquaSettings` to override global defaults for specific widgets
   - `adRefreshSeconds`: Override refresh interval
   - `carouselAutoAdvance`: Override carousel auto-advance

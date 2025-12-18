@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0.0
+
+* **MAJOR**: Add smooth ad transitions with preloading system
+* Add optional progress bar with `showProgressBar` and `progressBarColor` parameters
+* Implement background ad loading 5 seconds before transition
+* Eliminate empty loading states during ad refresh
+* Add video progress synchronization for progress bar
+* Progress bar respects widget borderRadius and positioning
+* Fallback to traditional loading if preload fails
+* Skip preloading for refresh intervals < 5 seconds
+* Improve user experience with seamless ad transitions
+
 ## 3.4.4
 
 * Add pointer cursor (hand) on web when banner has click URL

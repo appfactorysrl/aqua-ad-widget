@@ -84,6 +84,17 @@ class AquaAdWidget extends StatefulWidget {
   /// Defaults to null (no rounded corners).
   final double? borderRadius;
 
+  /// Whether to show the progress bar.
+  ///
+  /// If true, displays a progress bar at the bottom of the widget.
+  /// Defaults to false.
+  final bool showProgressBar;
+
+  /// The color of the progress bar.
+  ///
+  /// Defaults to white.
+  final Color progressBarColor;
+
   /// Creates an [AquaAdWidget].
   ///
   /// The [zoneId] parameter is required and must correspond to a valid
@@ -100,6 +111,8 @@ class AquaAdWidget extends StatefulWidget {
     this.adCount = 1,
     this.settings,
     this.borderRadius,
+    this.showProgressBar = false,
+    this.progressBarColor = Colors.white,
   });
 
   @override
@@ -125,6 +138,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   String? _currentLocale;
   bool _isLoadingAd = false;
   bool _hasError = false;
+  
+  // Progress bar
+  double _progressValue = 0.0;
+  Timer? _progressTimer;
 
   @override
   void initState() {
@@ -159,6 +176,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     _refreshTimer?.cancel();
     _preloadTimer?.cancel();
     _carouselTimer?.cancel();
+    _progressTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -302,6 +320,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   void _startRefreshTimer() {
     _refreshTimer?.cancel();
     _preloadTimer?.cancel();
+    _progressTimer?.cancel();
     
     // Non avviare timer se c'è un errore permanente
     if (_hasError) return;
@@ -311,6 +330,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (refreshSeconds == false) return;
     
     final seconds = refreshSeconds is bool ? 10 : (refreshSeconds as int);
+    
+    // Avvia barra di progresso
+    _startProgressBar(seconds);
+    
     if (seconds <= 5) {
       // Se il refresh è troppo veloce, usa il metodo tradizionale
       _refreshTimer = Timer(Duration(seconds: seconds), () {
@@ -338,6 +361,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _startCarouselTimer() {
     _carouselTimer?.cancel();
+    _progressTimer?.cancel();
     if (_ads.isEmpty) return;
 
     final currentAd = _ads[_currentAdIndex];
@@ -345,6 +369,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
     final imageSeconds = refreshSeconds is bool ? 30 : refreshSeconds;
     final duration = currentAd['isVideo'] ? 30 : imageSeconds;
+    
+    // Avvia barra di progresso per carousel
+    _startProgressBar(duration);
 
     _carouselTimer = Timer(Duration(seconds: duration), () {
       _nextSlide();
@@ -454,6 +481,27 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     }
   }
 
+  void _startProgressBar(int totalSeconds) {
+    if (!widget.showProgressBar) return;
+    
+    setState(() {
+      _progressValue = 0.0;
+    });
+    
+    const updateInterval = Duration(milliseconds: 100);
+    final increment = 1.0 / (totalSeconds * 1000 / updateInterval.inMilliseconds);
+    
+    _progressTimer = Timer.periodic(updateInterval, (timer) {
+      setState(() {
+        _progressValue += increment;
+        if (_progressValue >= 1.0) {
+          _progressValue = 1.0;
+          timer.cancel();
+        }
+      });
+    });
+  }
+
   Future<void> _handleClick(String url) async {
     await launchURL(url);
   }
@@ -470,6 +518,11 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
                 ? _nextSlide
                 : null),
         borderRadius: widget.borderRadius,
+        onProgressChanged: widget.showProgressBar ? (progress) {
+          setState(() {
+            _progressValue = progress;
+          });
+        } : null,
       );
     }
 
@@ -570,62 +623,104 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     }
 
     if (_ads.length == 1) {
+      final child = Stack(
+        children: [
+          _buildAdContent(_ads[0], 0),
+          if (widget.showProgressBar)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: LinearProgressIndicator(
+                value: _progressValue,
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(widget.progressBarColor),
+                minHeight: 2,
+              ),
+            ),
+        ],
+      );
+      
       return _buildSizedContainer(
-        child: _buildAdContent(_ads[0], 0),
+        child: widget.borderRadius != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(widget.borderRadius!),
+                child: child,
+              )
+            : child,
       );
     }
 
-    return _buildSizedContainer(
-      child: Stack(
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentAdIndex = index;
-              });
-              if (widget.settings?.carouselAutoAdvance ??
-                  AquaConfig.carouselAutoAdvance) {
-                _startCarouselTimer();
-              }
-            },
-            itemCount: _ads.length,
-            itemBuilder: (context, index) {
-              return _buildAdContent(_ads[index], index);
-            },
-          ),
+    final child = Stack(
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              _currentAdIndex = index;
+            });
+            if (widget.settings?.carouselAutoAdvance ??
+                AquaConfig.carouselAutoAdvance) {
+              _startCarouselTimer();
+            }
+          },
+          itemCount: _ads.length,
+          itemBuilder: (context, index) {
+            return _buildAdContent(_ads[index], index);
+          },
+        ),
+        if (widget.showProgressBar)
           Positioned(
-            bottom: 16,
+            bottom: 0,
             left: 0,
             right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_ads.length, (index) {
-                return GestureDetector(
-                  onTap: () {
-                    _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentAdIndex == index
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.5),
-                    ),
-                  ),
-                );
-              }),
+            child: LinearProgressIndicator(
+              value: _progressValue,
+              backgroundColor: Colors.transparent,
+              valueColor: AlwaysStoppedAnimation<Color>(widget.progressBarColor),
+              minHeight: 2,
             ),
           ),
-        ],
-      ),
+        Positioned(
+          bottom: 16,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_ads.length, (index) {
+              return GestureDetector(
+                onTap: () {
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _currentAdIndex == index
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.5),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+    
+    return _buildSizedContainer(
+      child: widget.borderRadius != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius!),
+              child: child,
+            )
+          : child,
     );
   }
 }
