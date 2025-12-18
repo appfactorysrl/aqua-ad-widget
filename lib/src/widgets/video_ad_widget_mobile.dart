@@ -10,6 +10,8 @@ class VideoAdWidget extends StatefulWidget {
   final double? borderRadius;
   final ValueChanged<double>? onProgressChanged;
   final ValueChanged<int>? onDurationAvailable;
+  final bool initialMuted;
+  final ValueChanged<bool>? onMuteChanged;
 
   const VideoAdWidget({
     super.key,
@@ -20,6 +22,8 @@ class VideoAdWidget extends StatefulWidget {
     this.borderRadius,
     this.onProgressChanged,
     this.onDurationAvailable,
+    this.initialMuted = true,
+    this.onMuteChanged,
   });
 
   @override
@@ -28,16 +32,17 @@ class VideoAdWidget extends StatefulWidget {
 
 class _VideoAdWidgetState extends State<VideoAdWidget> {
   late VideoPlayerController _controller;
-  bool _isMuted = true;
+  late bool _isMuted;
   bool _hasStarted = false;
 
   @override
   void initState() {
     super.initState();
+    _isMuted = widget.initialMuted;
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
       ..initialize().then((_) {
         setState(() {});
-        _controller.setVolume(0.0);
+        _controller.setVolume(_isMuted ? 0.0 : 1.0);
         _controller.play();
         _hasStarted = true;
         final duration = _controller.value.duration.inSeconds;
@@ -111,6 +116,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
               setState(() {
                 _isMuted = !_isMuted;
                 _controller.setVolume(_isMuted ? 0.0 : 1.0);
+                widget.onMuteChanged?.call(_isMuted);
               });
             },
             child: Container(

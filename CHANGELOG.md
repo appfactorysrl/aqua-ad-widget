@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.2.0
+
+* Add persistent mute/unmute state across video ads within the same widget
+* Fix widget height collapsing during ad transitions in responsive layouts
+* Capture and maintain calculated dimensions using LayoutBuilder
+* Improve stability for widgets without fixed width
+* Enhance user experience with consistent audio state across video transitions
+
 ## 4.1.0
 
 * Improve ad preloading to start immediately (1 second) instead of 5 seconds before refresh

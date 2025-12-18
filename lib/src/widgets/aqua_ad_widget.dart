@@ -127,6 +127,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   double? _adWidth;
   double? _adHeight;
   double? _currentRatio;
+  double? _calculatedWidth;
+  double? _calculatedHeight;
 
   List<Map<String, dynamic>> _ads = [];
   List<Map<String, dynamic>>? _preloadedAds;
@@ -143,6 +145,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   // Progress bar
   double _progressValue = 0.0;
   Timer? _progressTimer;
+  
+  // Mute state
+  bool _isMuted = true;
 
   @override
   void initState() {
@@ -519,6 +524,12 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         key: ValueKey('${ad['videoUrl']}_$_videoKeyCounter'),
         videoUrl: ad['videoUrl'],
         clickUrl: ad['clickUrl'],
+        initialMuted: _isMuted,
+        onMuteChanged: (muted) {
+          setState(() {
+            _isMuted = muted;
+          });
+        },
         onDurationAvailable: _ads.length == 1 ? (duration) {
           // Usa la durata effettiva del video per il cambio automatico
           _refreshTimer?.cancel();
@@ -604,16 +615,46 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     final ratio = _currentRatio ?? widget.ratio;
 
     if (widget.width != null) {
+      final height = widget.height ?? (widget.width! / ratio);
       return SizedBox(
         width: widget.width,
-        height: widget.height ?? (widget.width! / ratio),
+        height: height,
         child: child,
       );
     }
 
-    return AspectRatio(
-      aspectRatio: ratio,
-      child: child,
+    // Usa LayoutBuilder per catturare le dimensioni effettive
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth.isFinite) {
+          final width = constraints.maxWidth;
+          final height = width / ratio;
+          
+          // Salva le dimensioni calcolate
+          if (_calculatedWidth == null || _calculatedHeight == null) {
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  _calculatedWidth = width;
+                  _calculatedHeight = height;
+                });
+              }
+            });
+          }
+          
+          return SizedBox(
+            width: width,
+            height: height,
+            child: child,
+          );
+        }
+        
+        // Fallback ad AspectRatio se non ci sono dimensioni finite
+        return AspectRatio(
+          aspectRatio: ratio,
+          child: child,
+        );
+      },
     );
   }
 
@@ -624,6 +665,17 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (_isLoading && _ads.isEmpty) {
       if (hideIfEmpty) {
         return const SizedBox.shrink();
+      }
+      // Usa dimensioni salvate se disponibili per evitare collasso
+      if (_calculatedWidth != null && _calculatedHeight != null) {
+        return SizedBox(
+          width: _calculatedWidth,
+          height: _calculatedHeight,
+          child: Container(
+            color: Colors.white,
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+        );
       }
       return _buildSizedContainer(
         child: Container(

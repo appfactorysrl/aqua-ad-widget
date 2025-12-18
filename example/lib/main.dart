@@ -96,7 +96,6 @@ class HomePage extends StatelessWidget {
                 SizedBox(height: 8),
                 AquaAdWidget(
                   zoneId: 2,
-                  width: 528,
                   ratio: 16 / 9,
                   borderRadius: 16,
                   adCount: 'auto',

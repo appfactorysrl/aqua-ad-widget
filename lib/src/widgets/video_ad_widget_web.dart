@@ -12,6 +12,8 @@ class VideoAdWidget extends StatefulWidget {
   final double? borderRadius;
   final ValueChanged<double>? onProgressChanged;
   final ValueChanged<int>? onDurationAvailable;
+  final bool initialMuted;
+  final ValueChanged<bool>? onMuteChanged;
 
   const VideoAdWidget({
     super.key,
@@ -22,6 +24,8 @@ class VideoAdWidget extends StatefulWidget {
     this.borderRadius,
     this.onProgressChanged,
     this.onDurationAvailable,
+    this.initialMuted = true,
+    this.onMuteChanged,
   });
 
   @override
@@ -29,7 +33,7 @@ class VideoAdWidget extends StatefulWidget {
 }
 
 class _VideoAdWidgetState extends State<VideoAdWidget> {
-  bool _isMuted = true;
+  late bool _isMuted;
   web.HTMLVideoElement? _videoElement;
   late String _viewType;
   Timer? _progressTimer;
@@ -37,6 +41,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   @override
   void initState() {
     super.initState();
+    _isMuted = widget.initialMuted;
     _createVideoElement();
   }
 
@@ -45,7 +50,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
         'video-${widget.videoUrl.hashCode}-${DateTime.now().millisecondsSinceEpoch}';
     _videoElement = web.HTMLVideoElement()
       ..src = widget.videoUrl
-      ..muted = true
+      ..muted = _isMuted
       ..loop = false;
 
     _videoElement!.style.width = '100%';
@@ -117,6 +122,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
               setState(() {
                 _isMuted = !_isMuted;
                 _videoElement?.muted = _isMuted;
+                widget.onMuteChanged?.call(_isMuted);
               });
             },
             child: Container(
