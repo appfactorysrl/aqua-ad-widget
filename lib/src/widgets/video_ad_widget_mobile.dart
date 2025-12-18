@@ -5,17 +5,21 @@ import '../utils/url_launcher.dart';
 class VideoAdWidget extends StatefulWidget {
   final String videoUrl;
   final String? clickUrl;
+  final VoidCallback? onVideoStarted;
   final VoidCallback? onVideoEnded;
   final double? borderRadius;
   final ValueChanged<double>? onProgressChanged;
+  final ValueChanged<int>? onDurationAvailable;
 
   const VideoAdWidget({
     super.key,
     required this.videoUrl,
     this.clickUrl,
+    this.onVideoStarted,
     this.onVideoEnded,
     this.borderRadius,
     this.onProgressChanged,
+    this.onDurationAvailable,
   });
 
   @override
@@ -36,6 +40,9 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
         _controller.setVolume(0.0);
         _controller.play();
         _hasStarted = true;
+        final duration = _controller.value.duration.inSeconds;
+        widget.onDurationAvailable?.call(duration);
+        widget.onVideoStarted?.call();
       });
 
     _controller.addListener(_onVideoEnd);

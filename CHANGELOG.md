@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.1.0
+
+* Improve ad preloading to start immediately (1 second) instead of 5 seconds before refresh
+* Fix video widget recreation issue causing second videos to freeze
+* Add unique keys to video widgets to force proper recreation on URL change
+* Maintain widget dimensions during ad transitions to prevent layout shifts
+* Optimize preloading for short video ads
+* Improve overall video playback stability and transitions
+
 ## 4.0.0
 
 * **MAJOR**: Add smooth ad transitions with preloading system

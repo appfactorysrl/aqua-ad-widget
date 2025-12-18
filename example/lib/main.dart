@@ -75,22 +75,49 @@ class HomePage extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(16, kToolbarHeight + 16, 16, 16),
             child: Column(
               children: [
-                Text('Zona 2 - Width 300, Ratio 16:9',
+                Text('Zona 2 - Width 528, Ratio 16:9',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white)),
                 SizedBox(height: 8),
+                Container(
+                  width: 528,
+                  height: 528 / (16 / 9),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  child: Center(
+                    child: Text('Box Sopra', style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+                SizedBox(height: 8),
                 AquaAdWidget(
                   zoneId: 2,
-                  width: 300,
+                  width: 528,
                   ratio: 16 / 9,
-                  borderRadius: 12,
+                  borderRadius: 16,
                   adCount: 'auto',
                   showProgressBar: true,
                   progressBarColor: Colors.white,
                   settings: AquaSettings(
+                    adRefreshSeconds: 5,
                     hideIfEmpty: true,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  width: 528,
+                  height: 528 / (16 / 9),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  child: Center(
+                    child: Text('Box Sotto', style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],

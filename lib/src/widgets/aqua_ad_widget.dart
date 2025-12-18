@@ -131,6 +131,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   List<Map<String, dynamic>> _ads = [];
   List<Map<String, dynamic>>? _preloadedAds;
   int _currentAdIndex = 0;
+  int _videoKeyCounter = 0;
   final PageController _pageController = PageController();
   Timer? _carouselTimer;
   late AquaLocalizations _localizations;
@@ -285,6 +286,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _ads = adsToShow;
           _currentAdIndex = 0;
           _isLoading = false;
+          _error = null;
         });
         _isLoadingAd = false;
 
@@ -344,8 +346,12 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       return;
     }
     
-    // Avvia precaricamento 5 secondi prima del cambio
-    _preloadTimer = Timer(Duration(seconds: seconds - 5), () {
+    // Calcola quando avviare il precaricamento per immagini
+    final preloadDelay = seconds - 5;
+    final preloadSeconds = preloadDelay > 0 ? preloadDelay : 1;
+    
+    // Avvia precaricamento
+    _preloadTimer = Timer(Duration(seconds: preloadSeconds), () {
       if (!_hasError) {
         _preloadNextAd();
       }
@@ -390,7 +396,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   }
 
   Future<void> _preloadNextAd() async {
-    if (_isLoadingAd) return;
     
     try {
       // ignore: deprecated_member_use_from_same_package
@@ -464,6 +469,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         _ads = _preloadedAds!;
         _currentAdIndex = 0;
         _preloadedAds = null;
+        _videoKeyCounter++;
+        // Non cambiare _isLoading per mantenere le dimensioni
       });
       
       if (_ads.length == 1) {
@@ -509,14 +516,34 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   Widget _buildAdContent(Map<String, dynamic> ad, int index) {
     if (ad['isVideo'] && ad['videoUrl'] != null) {
       return VideoAdWidget(
+        key: ValueKey('${ad['videoUrl']}_$_videoKeyCounter'),
         videoUrl: ad['videoUrl'],
         clickUrl: ad['clickUrl'],
-        onVideoEnded: _ads.length == 1
-            ? _loadAd
-            : ((widget.settings?.carouselAutoAdvance ??
-                    AquaConfig.carouselAutoAdvance)
-                ? _nextSlide
-                : null),
+        onDurationAvailable: _ads.length == 1 ? (duration) {
+          // Usa la durata effettiva del video per il cambio automatico
+          _refreshTimer?.cancel();
+          _preloadTimer?.cancel();
+          
+          // Precarica immediatamente
+          _preloadTimer = Timer(Duration(seconds: 1), () {
+            if (!_hasError && !_isLoadingAd) {
+              _preloadNextAd();
+            }
+          });
+          
+          // Timer principale per il cambio basato sulla durata del video
+          _refreshTimer = Timer(Duration(seconds: duration + 1), () {
+            if (!_hasError) {
+              if (_preloadedAds != null && _preloadedAds!.isNotEmpty) {
+                _switchToPreloadedAd();
+              } else {
+                _loadAd();
+              }
+            }
+          });
+        } : null,
+        onVideoStarted: null,
+        onVideoEnded: null,
         borderRadius: widget.borderRadius,
         onProgressChanged: widget.showProgressBar ? (progress) {
           setState(() {
@@ -594,7 +621,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   Widget build(BuildContext context) {
     final hideIfEmpty = widget.settings?.hideIfEmpty ?? AquaConfig.hideIfEmpty;
 
-    if (_isLoading) {
+    if (_isLoading && _ads.isEmpty) {
       if (hideIfEmpty) {
         return const SizedBox.shrink();
       }
@@ -606,7 +633,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       );
     }
 
-    if (_error != null || _hasError) {
+    if ((_error != null || _hasError) && _ads.isEmpty) {
       if (hideIfEmpty) {
         return const SizedBox.shrink();
       }

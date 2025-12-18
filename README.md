@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^4.0.0
+  aqua_ad_widget: ^4.1.0
 ```
 
 ## Usage
@@ -43,7 +43,7 @@ AquaConfig.setDefaultHideIfEmpty(true); // hide widget when no ads available
 // Display an ad
 AquaAdWidget(
   zoneId: 123,
-  width: 300,
+  width: 528,
   height: 250,
   ratio: 16/9, // optional, default: 16/9
   autoGrow: false, // optional, default: false
