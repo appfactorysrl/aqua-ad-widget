@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.1
+
+* Minor code improvements and optimizations
+
 ## 4.2.0
 
 * Add persistent mute/unmute state across video ads within the same widget

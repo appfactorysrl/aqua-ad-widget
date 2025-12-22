@@ -7,7 +7,7 @@ void main() {
   // Configurazioni globali della libreria
   AquaConfig.setDefaultAdRefreshSeconds(15);
   AquaConfig.setDefaultBaseUrl('https://delivery.ads.fantasanremo.com/asyncspc.php');
-  AquaConfig.setDefaultLocation('https://staging.fantasanremo.com');
+  AquaConfig.setDefaultLocation('https://fantasanremo.com');
   AquaConfig.setDefaultHideIfEmpty(true);
 
   runApp(const MyApp());
@@ -95,8 +95,8 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 AquaAdWidget(
-                  zoneId: 2,
-                  ratio: 16 / 9,
+                  zoneId: 5,
+                  ratio: 1440 / 810,
                   borderRadius: 16,
                   adCount: 'auto',
                   showProgressBar: true,

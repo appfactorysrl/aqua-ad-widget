@@ -141,11 +141,11 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   String? _currentLocale;
   bool _isLoadingAd = false;
   bool _hasError = false;
-  
+
   // Progress bar
   double _progressValue = 0.0;
   Timer? _progressTimer;
-  
+
   // Mute state
   bool _isMuted = true;
 
@@ -166,10 +166,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   }
 
   void _initializeLocalization() {
-    final locale = widget.settings?.locale ?? 
-                   (AquaConfig.defaultLocale != 'en' ? AquaConfig.defaultLocale : 
+    final locale = widget.settings?.locale ??
+                   (AquaConfig.defaultLocale != 'en' ? AquaConfig.defaultLocale :
                    Localizations.localeOf(context).languageCode);
-    
+
     // Solo reinizializza se il locale è cambiato
     if (_currentLocale != locale) {
       _currentLocale = locale;
@@ -192,11 +192,11 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (_isLoadingAd) {
       return;
     }
-    
+
     if (_hasError) {
       return;
     }
-    
+
     _isLoadingAd = true;
     _refreshTimer?.cancel();
 
@@ -314,10 +314,12 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         return;
       }
     } catch (e) {
-      setState(() {
-        _error = _localizations.connectionError;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = _localizations.connectionError;
+          _isLoading = false;
+        });
+      }
       _isLoadingAd = false;
       // Non avviare timer in caso di errore
       return;
@@ -328,19 +330,19 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     _refreshTimer?.cancel();
     _preloadTimer?.cancel();
     _progressTimer?.cancel();
-    
+
     // Non avviare timer se c'è un errore permanente
     if (_hasError) return;
-    
+
     final refreshSeconds =
         widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
     if (refreshSeconds == false) return;
-    
+
     final seconds = refreshSeconds is bool ? 10 : (refreshSeconds as int);
-    
+
     // Avvia barra di progresso
     _startProgressBar(seconds);
-    
+
     if (seconds <= 5) {
       // Se il refresh è troppo veloce, usa il metodo tradizionale
       _refreshTimer = Timer(Duration(seconds: seconds), () {
@@ -350,18 +352,18 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       });
       return;
     }
-    
+
     // Calcola quando avviare il precaricamento per immagini
     final preloadDelay = seconds - 5;
     final preloadSeconds = preloadDelay > 0 ? preloadDelay : 1;
-    
+
     // Avvia precaricamento
     _preloadTimer = Timer(Duration(seconds: preloadSeconds), () {
       if (!_hasError) {
         _preloadNextAd();
       }
     });
-    
+
     // Timer principale per il cambio effettivo
     _refreshTimer = Timer(Duration(seconds: seconds), () {
       if (!_hasError) {
@@ -380,7 +382,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
     final imageSeconds = refreshSeconds is bool ? 30 : refreshSeconds;
     final duration = currentAd['isVideo'] ? 30 : imageSeconds;
-    
+
     // Avvia barra di progresso per carousel
     _startProgressBar(duration);
 
@@ -401,7 +403,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   }
 
   Future<void> _preloadNextAd() async {
-    
+
     try {
       // ignore: deprecated_member_use_from_same_package
       final baseUrl = widget.settings?.baseUrl ??
@@ -477,7 +479,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         _videoKeyCounter++;
         // Non cambiare _isLoading per mantenere le dimensioni
       });
-      
+
       if (_ads.length == 1) {
         final firstAd = _ads[0];
         if (!firstAd['isVideo']) {
@@ -495,14 +497,14 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _startProgressBar(int totalSeconds) {
     if (!widget.showProgressBar) return;
-    
+
     setState(() {
       _progressValue = 0.0;
     });
-    
+
     const updateInterval = Duration(milliseconds: 100);
     final increment = 1.0 / (totalSeconds * 1000 / updateInterval.inMilliseconds);
-    
+
     _progressTimer = Timer.periodic(updateInterval, (timer) {
       setState(() {
         _progressValue += increment;
@@ -534,14 +536,14 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           // Usa la durata effettiva del video per il cambio automatico
           _refreshTimer?.cancel();
           _preloadTimer?.cancel();
-          
+
           // Precarica immediatamente
           _preloadTimer = Timer(Duration(seconds: 1), () {
             if (!_hasError && !_isLoadingAd) {
               _preloadNextAd();
             }
           });
-          
+
           // Timer principale per il cambio basato sulla durata del video
           _refreshTimer = Timer(Duration(seconds: duration + 1), () {
             if (!_hasError) {
@@ -629,7 +631,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         if (constraints.maxWidth.isFinite) {
           final width = constraints.maxWidth;
           final height = width / ratio;
-          
+
           // Salva le dimensioni calcolate
           if (_calculatedWidth == null || _calculatedHeight == null) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -641,14 +643,14 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               }
             });
           }
-          
+
           return SizedBox(
             width: width,
             height: height,
             child: child,
           );
         }
-        
+
         // Fallback ad AspectRatio se non ci sono dimensioni finite
         return AspectRatio(
           aspectRatio: ratio,
@@ -719,7 +721,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             ),
         ],
       );
-      
+
       return _buildSizedContainer(
         child: widget.borderRadius != null
             ? ClipRRect(
@@ -792,7 +794,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         ),
       ],
     );
-    
+
     return _buildSizedContainer(
       child: widget.borderRadius != null
           ? ClipRRect(
