@@ -3,7 +3,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'dart:developer' as developer;
 import '../config/aqua_config.dart';
 import '../config/aqua_settings.dart';
 import '../utils/url_launcher.dart';
