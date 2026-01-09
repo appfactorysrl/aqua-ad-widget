@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.3.0
+
+* Add automatic beacon tracking pixel detection and loading for impression tracking
+* Parse HTML content to detect tracking beacons (1x1 images, lg.php URLs, beacon keywords)
+* Load beacons using invisible overlay images to avoid CORS issues
+* Full compatibility with Revive AdServer and Aqua Platform impression tracking
+* Improve ad impression accuracy and analytics data collection
+
 ## 4.2.1
 
 * Minor code improvements and optimizations
