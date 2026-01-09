@@ -3,7 +3,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'dart:developer' as developer;
 import '../config/aqua_config.dart';
 import '../config/aqua_settings.dart';
 import '../utils/url_launcher.dart';
@@ -23,7 +22,7 @@ import 'video_ad_widget.dart';
 ///   height: 250,
 /// )
 /// ```
-class AquaAdWidget extends StatefulWidget {
+class AquaAdWidgetOld extends StatefulWidget {
   /// The numeric ID of the ad zone from your Revive AdServer.
   final int zoneId;
 
@@ -100,7 +99,7 @@ class AquaAdWidget extends StatefulWidget {
   ///
   /// The [zoneId] parameter is required and must correspond to a valid
   /// zone ID in your Revive AdServer configuration.
-  const AquaAdWidget({
+  const AquaAdWidgetOld({
     super.key,
     required this.zoneId,
     this.width,
@@ -117,10 +116,10 @@ class AquaAdWidget extends StatefulWidget {
   });
 
   @override
-  State<AquaAdWidget> createState() => _AquaAdWidgetState();
+  State<AquaAdWidgetOld> createState() => _AquaAdWidgetOldState();
 }
 
-class _AquaAdWidgetState extends State<AquaAdWidget> {
+class _AquaAdWidgetOldState extends State<AquaAdWidgetOld> {
   bool _isLoading = true;
   String? _error;
   Timer? _refreshTimer;
@@ -253,12 +252,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               ? RegExp(r'<a href=\"([^\"]+)\"').firstMatch(htmlContent)
               : RegExp(r"href='([^']+)'").firstMatch(htmlContent);
 
-          // Parse beacon tracking pixel
-          final beaconUrl = _parseBeaconFromHtml(htmlContent);
-          if (beaconUrl != null) {
-            _loadBeacon(beaconUrl);
-          }
-
           if (videoMatch != null || imageMatch != null) {
             loadedAds.add({
               'html': htmlContent,
@@ -268,7 +261,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               'imageUrl': imageMatch?.group(1),
               'clickUrl': linkMatch?.group(1),
               'isVideo': videoMatch != null,
-              'beaconUrl': beaconUrl,
             });
           }
         }
@@ -453,12 +445,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               ? RegExp(r'<a href=\"([^\"]+)\"').firstMatch(htmlContent)
               : RegExp(r"href='([^']+)'").firstMatch(htmlContent);
 
-          // Parse beacon tracking pixel
-          final beaconUrl = _parseBeaconFromHtml(htmlContent);
-          if (beaconUrl != null) {
-            _loadBeacon(beaconUrl);
-          }
-
           if (videoMatch != null || imageMatch != null) {
             loadedAds.add({
               'html': htmlContent,
@@ -468,7 +454,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               'imageUrl': imageMatch?.group(1),
               'clickUrl': linkMatch?.group(1),
               'isVideo': videoMatch != null,
-              'beaconUrl': beaconUrl,
             });
           }
         }
@@ -531,57 +516,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     });
   }
 
-  /// Parse beacon tracking pixel from HTML content
-  String? _parseBeaconFromHtml(String htmlContent) {
-    final patterns = [
-      RegExp(r"<img[^>]*width='0'[^>]*height='0'[^>]*src='([^']+)'[^>]*>", caseSensitive: false),
-      RegExp(r"<img[^>]*src='([^']*lg\.php[^']*)'[^>]*>", caseSensitive: false),
-      RegExp(r"<img[^>]*src='([^']*beacon[^']*)'[^>]*>", caseSensitive: false),
-    ];
-    
-    for (final pattern in patterns) {
-      final match = pattern.firstMatch(htmlContent);
-      if (match != null) {
-        final beaconUrl = match.group(1);
-        if (beaconUrl != null) {
-          return beaconUrl;
-        }
-      }
-    }
-    
-    return null;
-  }
-  
-  /// Load beacon tracking pixel using invisible image
-  void _loadBeacon(String beaconUrl) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final overlay = Overlay.of(context);
-        final entry = OverlayEntry(
-          builder: (context) => Positioned(
-            left: -1000,
-            top: -1000,
-            child: SizedBox(
-              width: 1,
-              height: 1,
-              child: Image.network(
-                beaconUrl,
-                width: 1,
-                height: 1,
-                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-              ),
-            ),
-          ),
-        );
-        overlay.insert(entry);
-        
-        Timer(const Duration(seconds: 2), () {
-          entry.remove();
-        });
-      }
-    });
-  }
-
   Future<void> _handleClick(String url) async {
     await launchURL(url);
   }
@@ -641,7 +575,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         imageUrl,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          // Marca come errore permanente per evitare loop
           SchedulerBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               setState(() {
