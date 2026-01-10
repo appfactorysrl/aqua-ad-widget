@@ -9,7 +9,7 @@ void main() {
   AquaConfig.setDefaultBaseUrl('https://delivery.ads.fantasanremo.com/asyncspc.php');
   AquaConfig.setDefaultLocation('https://fantasanremo.com');
   AquaConfig.setDefaultHideIfEmpty(true);
-  AquaConfig.setDebugMode(true); // Abilita/disabilita i log di debug
+  AquaConfig.setDebugMode(false); // Abilita/disabilita i log di debug
 
   runApp(const MyApp());
 }

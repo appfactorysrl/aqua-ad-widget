@@ -106,6 +106,7 @@ class DebugAquaAdWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Monitora quando il widget viene ricostruito
+    // ignore: avoid_print
     print('DebugAquaAdWidget build() called');
     
     return AquaAdWidget(

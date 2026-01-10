@@ -155,6 +155,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   void _debugLog(String message) {
     if (AquaConfig.debugMode) {
+      // ignore: avoid_print
       print(message);
     }
   }
@@ -643,7 +644,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     double previousProgress = 0.0;
     
     // Controlla ogni 5 secondi se il video sta progredendo
-    _videoProgressCheckTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _videoProgressCheckTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (!mounted) {
         _debugLog('🔍 Progress check cancelled - widget not mounted');
         timer.cancel();
@@ -803,7 +804,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _preloadTimer?.cancel();
 
           // Precarica immediatamente
-          _preloadTimer = Timer(Duration(seconds: 1), () {
+          _preloadTimer = Timer(const Duration(seconds: 1), () {
             if (!_hasError && !_isLoadingAd) {
               _preloadNextAd();
             }
