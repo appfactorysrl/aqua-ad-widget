@@ -86,9 +86,9 @@ class HomePage extends StatelessWidget {
                   width: 528,
                   height: 528 / (16 / 9),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   ),
                   child: Center(
                     child: Text('Box Sopra', style: TextStyle(color: Colors.white)),
@@ -102,10 +102,10 @@ class HomePage extends StatelessWidget {
                   adCount: 5,
                   showProgressBar: true,
                   progressBarColor: Colors.white,
-                  noFallbackWhenCarousel: true,
                   settings: AquaSettings(
                     adRefreshSeconds: 5,
                     hideIfEmpty: true,
+                    noFallbackWhenCarousel: true,
                   ),
                 ),
                 SizedBox(height: 8),
@@ -113,9 +113,9 @@ class HomePage extends StatelessWidget {
                   width: 528,
                   height: 528 / (16 / 9),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   ),
                   child: Center(
                     child: Text('Box Sotto', style: TextStyle(color: Colors.white)),

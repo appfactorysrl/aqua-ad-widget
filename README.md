@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^4.2.0
+  aqua_ad_widget: ^5.0.0
 ```
 
 ## Usage
@@ -94,6 +94,7 @@ AquaAdWidget(
   - `location`: Override tracking location
   - `locale`: Override language ('en', 'it', 'es', 'fr', 'de')
   - `hideIfEmpty`: Override hide behavior when no ads available
+  - `noFallbackWhenCarousel`: Override fallback filtering in carousels
 
 ## Supported Banner Types
 
@@ -143,6 +144,12 @@ void main() {
   // Optional: Hide widget when no ads available (default: false)
   AquaConfig.setDefaultHideIfEmpty(true);
   
+  // Optional: Enable debug logging (default: false)
+  AquaConfig.setDebugMode(true);
+  
+  // Optional: Filter fallback ads from carousels (default: true)
+  AquaConfig.setDefaultNoFallbackWhenCarousel(true);
+  
   runApp(MyApp());
 }
 ```
@@ -181,8 +188,50 @@ AquaConfig.setDefaultHideIfEmpty(true);
 // Per-widget override
 AquaAdWidget(
   zoneId: 123,
-  settings: AquaSettings(hideIfEmpty: true),
+  settings: AquaSettings(
+    hideIfEmpty: true,
+    noFallbackWhenCarousel: false, // Allow fallback ads in this carousel
+  ),
 )
+```
+
+## Debug Mode
+
+Enable debug logging to troubleshoot ad loading and video playback issues:
+
+```dart
+// Global configuration
+AquaConfig.setDebugMode(true); // Enable debug logs
+
+// Debug logs include:
+// - Ad loading status and errors
+// - Video playback events
+// - Fallback ad detection
+// - Carousel navigation events
+// - Progress tracking information
+```
+
+## Fallback Ad Filtering
+
+When the ad server returns ads from different zones (fallback ads), you can control their display in carousels:
+
+```dart
+// Global configuration - filter fallback ads from all carousels
+AquaConfig.setDefaultNoFallbackWhenCarousel(true); // default
+
+// Per-widget override - allow fallback ads in specific carousel
+AquaAdWidget(
+  zoneId: 123,
+  adCount: 5,
+  settings: AquaSettings(
+    noFallbackWhenCarousel: false, // Show fallback ads in this carousel
+  ),
+)
+
+// Behavior:
+// - When true: Fallback ads are filtered out if non-fallback ads are available
+// - When false: All ads (including fallbacks) are shown
+// - Single ads are never filtered (only applies to carousels)
 ```
 
 ### Finding Your Server URL

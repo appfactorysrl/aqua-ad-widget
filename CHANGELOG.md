@@ -1,5 +1,20 @@
 # Changelog
 
+## 5.0.0
+
+* **MAJOR**: Fix double video player instantiation in carousels
+* Add lazy video loading with `isVisible` parameter to prevent multiple simultaneous players
+* Add fallback ad detection by comparing zone IDs in click URLs
+* Add `noFallbackWhenCarousel` setting to filter fallback ads from carousels
+* Add global configuration `AquaConfig.setDefaultNoFallbackWhenCarousel()`
+* Add per-widget override via `AquaSettings.noFallbackWhenCarousel`
+* Improve debug logging - all video logs now respect `AquaConfig.setDebugMode()`
+* Add comprehensive debug logs for fallback detection and filtering
+* Only visible videos in carousels are initialized and play, preventing resource waste
+* Fallback ads are automatically filtered when non-fallback ads are available
+* Single ads are never filtered (fallback filtering only applies to carousels)
+* Update documentation with debug mode and fallback filtering sections
+
 ## 4.3.0
 
 * Add automatic beacon tracking pixel detection and loading for impression tracking

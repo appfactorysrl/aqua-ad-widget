@@ -33,6 +33,11 @@ class AquaSettings {
   /// If null, uses global default.
   final bool? hideIfEmpty;
 
+  /// Whether to filter out fallback ads in carousel mode.
+  ///
+  /// If null, uses global default.
+  final bool? noFallbackWhenCarousel;
+
   /// Creates an [AquaSettings] instance.
   const AquaSettings({
     this.adRefreshSeconds,
@@ -41,5 +46,6 @@ class AquaSettings {
     this.location,
     this.locale,
     this.hideIfEmpty,
+    this.noFallbackWhenCarousel,
   });
 }

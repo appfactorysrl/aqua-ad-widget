@@ -95,13 +95,6 @@ class AquaAdWidget extends StatefulWidget {
   /// Defaults to white.
   final Color progressBarColor;
 
-  /// Whether to filter out fallback ads in carousel mode.
-  ///
-  /// If true and there are multiple ads, fallback ads will be removed
-  /// from the carousel if other non-fallback ads are available.
-  /// Defaults to true.
-  final bool noFallbackWhenCarousel;
-
   /// Creates an [AquaAdWidget].
   ///
   /// The [zoneId] parameter is required and must correspond to a valid
@@ -120,7 +113,6 @@ class AquaAdWidget extends StatefulWidget {
     this.borderRadius,
     this.showProgressBar = false,
     this.progressBarColor = Colors.white,
-    this.noFallbackWhenCarousel = true,
   });
 
   @override
@@ -220,6 +212,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
     _isLoadingAd = true;
     _refreshTimer?.cancel();
+    _videoProgressCheckTimer?.cancel(); // Cancella anche il timer di controllo video
+    
+    // Incrementa il counter per invalidare tutti i video precedenti
+    _videoKeyCounter++;
 
     setState(() {
       _isLoading = true;
@@ -342,16 +338,16 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             _startRefreshTimer();
           } else {
             // Per video singoli, avvia il controllo dopo che il widget è stato costruito
-            print('🎬 Single video detected, will start progress check after build');
+            _debugLog('🎬 Single video detected, will start progress check after build');
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted && _ads.isNotEmpty && _ads[0]['isVideo']) {
-                print('🎬 Starting progress check for single video after build (PostFrameCallback)');
+                _debugLog('🎬 Starting progress check for single video after build (PostFrameCallback)');
                 _startVideoProgressCheck();
               }
             });
           }
-        } else if (widget.settings?.carouselAutoAdvance ??
-            AquaConfig.carouselAutoAdvance) {
+        } else if (filteredAds.length > 1 && (widget.settings?.carouselAutoAdvance ??
+            AquaConfig.carouselAutoAdvance)) {
           _startCarouselTimer();
         }
       } else {
@@ -591,13 +587,15 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       if (_ads.length == 1) {
         final firstAd = _ads[0];
         if (!firstAd['isVideo']) {
+          _debugLog('🖼️ Single image ad detected, starting refresh timer');
           _startRefreshTimer();
         } else {
           // Per video singoli precaricati, il controllo sarà avviato quando il video diventa visibile
-          print('🎬 Single preloaded video detected, progress check will start when video becomes visible');
+          _debugLog('🎬 Single preloaded video detected, progress check will start when video becomes visible');
         }
-      } else if (widget.settings?.carouselAutoAdvance ??
-          AquaConfig.carouselAutoAdvance) {
+      } else if (_ads.length > 1 && (widget.settings?.carouselAutoAdvance ??
+          AquaConfig.carouselAutoAdvance)) {
+        _debugLog('🎠 Multiple ads detected, starting carousel timer');
         _startCarouselTimer();
       }
     } else {
@@ -613,6 +611,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     _progressTimer?.cancel();
     _isVideoControllingProgress = false;
 
+    _debugLog('🔄 Starting progress bar for $totalSeconds seconds, resetting to 0.0');
     setState(() {
       _progressValue = 0.0;
     });
@@ -684,7 +683,9 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   /// Filter fallback ads from carousel if needed
   List<Map<String, dynamic>> _filterFallbacksIfNeeded(List<Map<String, dynamic>> ads) {
-    if (!widget.noFallbackWhenCarousel || ads.length <= 1) {
+    final noFallbackWhenCarousel = widget.settings?.noFallbackWhenCarousel ?? AquaConfig.noFallbackWhenCarousel;
+    
+    if (!noFallbackWhenCarousel || ads.length <= 1) {
       return ads;
     }
     
@@ -822,12 +823,12 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         onVideoStarted: () {
           // Solo log e controllo per video visibili
           if (isVisible) {
-            print('▶️ Video started: ${ad['videoUrl']} (index: $index, current: $_currentAdIndex)');
+            _debugLog('▶️ Video started: ${ad['videoUrl']} (index: $index, current: $_currentAdIndex)');
             if (_ads.length > 1) {
-              print('  → Starting progress check for visible carousel video');
+              _debugLog('  → Starting progress check for visible carousel video');
               _startVideoProgressCheck();
             } else {
-              print('  → Single video started');
+              _debugLog('  → Single video started');
               _startVideoProgressCheck();
             }
           }
@@ -835,31 +836,37 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         onVideoEnded: () {
           // Solo per video visibili
           if (isVisible) {
-            print('⏹️ Video ended: ${ad['videoUrl']} - cancelling progress check timer');
+            _debugLog('⏹️ Video ended: ${ad['videoUrl']} - cancelling progress check timer');
             _videoProgressCheckTimer?.cancel();
             if (_ads.length > 1) {
-              print('  → Moving to next slide');
+              _debugLog('  → Moving to next slide');
               if (mounted) {
                 _nextSlide();
               }
             } else {
-              print('  → Single video ended');
+              _debugLog('  → Single video ended');
             }
           }
         },
         borderRadius: widget.borderRadius,
         onProgressChanged: (progress) {
-          // Solo per video visibili
+          // Solo per video visibili e con key corretta
           if (isVisible) {
-            print('📊 Video progress update: $progress (video: ${ad['videoUrl']}, index: $index)');
-            _lastVideoProgress = progress;
+            final currentVideoKey = '${_ads.isNotEmpty ? _ads[_currentAdIndex]['videoUrl'] : ''}_$_videoKeyCounter';
+            final thisVideoKey = '${ad['videoUrl']}_$_videoKeyCounter';
             
-            // Solo aggiorna la UI se la progress bar è abilitata
-            if (widget.showProgressBar && mounted) {
-              setState(() {
-                _isVideoControllingProgress = true;
-                _progressValue = progress;
-              });
+            // Verifica che questo sia il video corrente
+            if (_currentAdIndex == index && currentVideoKey == thisVideoKey) {
+              _debugLog('📊 Video progress update: $progress (video: ${ad['videoUrl']}, index: $index)');
+              _lastVideoProgress = progress;
+              
+              // Solo aggiorna la UI se la progress bar è abilitata
+              if (widget.showProgressBar && mounted) {
+                setState(() {
+                  _isVideoControllingProgress = true;
+                  _progressValue = progress;
+                });
+              }
             }
           }
         },
@@ -884,12 +891,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
               });
             }
           });
-          return Container(
-            color: Colors.grey[300],
-            child: Center(
-              child: Text(_localizations.advertisement, style: const TextStyle(color: Colors.grey)),
-            ),
-          );
+          return const SizedBox.shrink();
         },
       );
 
@@ -1044,7 +1046,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             });
             
             // Cancella i timer esistenti
-            print('🔄 Page changed to $index - cancelling all timers');
+            _debugLog('🔄 Page changed to $index - cancelling all timers');
             _carouselTimer?.cancel();
             _videoFallbackTimer?.cancel();
             _videoProgressCheckTimer?.cancel();
@@ -1052,7 +1054,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             
             // Se la nuova slide è un video, avvia il controllo del progresso
             if (_ads[index]['isVideo']) {
-              print('📱 Moved to video slide $index, starting progress check');
+              _debugLog('📱 Moved to video slide $index, starting progress check');
               _startVideoProgressCheck();
             }
             

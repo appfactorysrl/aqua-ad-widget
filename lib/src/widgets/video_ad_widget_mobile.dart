@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:async';
 import '../utils/url_launcher.dart';
 
 class VideoAdWidget extends StatefulWidget {
@@ -37,6 +38,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   late bool _isMuted;
   bool _hasStarted = false;
   bool _isInitialized = false;
+  Timer? _progressTimer;
 
   @override
   void initState() {
@@ -50,9 +52,9 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   @override
   void didUpdateWidget(VideoAdWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isVisible && !oldWidget.isVisible && !_isInitialized) {
+    if (widget.isVisible && !_isInitialized) {
       _initializeController();
-    } else if (!widget.isVisible && oldWidget.isVisible) {
+    } else if (!widget.isVisible && _isInitialized) {
       _disposeController();
     }
   }
@@ -62,14 +64,22 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
     
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
       ..initialize().then((_) {
-        if (widget.isVisible && mounted) {
+        if (widget.isVisible && mounted && _controller != null) {
+          // Verifica che il video sia effettivamente caricato
+          if (_controller!.value.isInitialized && _controller!.value.duration.inMilliseconds > 0) {
+            setState(() {});
+            _controller!.setVolume(_isMuted ? 0.0 : 1.0);
+            _controller!.play();
+            _hasStarted = true;
+            _startProgressTracking();
+            final duration = _controller!.value.duration.inSeconds;
+            widget.onDurationAvailable?.call(duration);
+            widget.onVideoStarted?.call();
+          }
+        }
+      }).catchError((error) {
+        if (mounted) {
           setState(() {});
-          _controller!.setVolume(_isMuted ? 0.0 : 1.0);
-          _controller!.play();
-          _hasStarted = true;
-          final duration = _controller!.value.duration.inSeconds;
-          widget.onDurationAvailable?.call(duration);
-          widget.onVideoStarted?.call();
         }
       });
 
@@ -78,12 +88,28 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   }
 
   void _disposeController() {
+    _progressTimer?.cancel();
     _controller?.removeListener(_onVideoEnd);
     _controller?.pause();
     _controller?.dispose();
     _controller = null;
     _hasStarted = false;
     _isInitialized = false;
+  }
+
+  void _startProgressTracking() {
+    _progressTimer?.cancel();
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (!widget.isVisible || !mounted || _controller == null) {
+        timer.cancel();
+        return;
+      }
+      if (_controller!.value.duration.inMilliseconds > 0) {
+        final progress = _controller!.value.position.inMilliseconds / 
+                        _controller!.value.duration.inMilliseconds;
+        widget.onProgressChanged?.call(progress.clamp(0.0, 1.0));
+      }
+    });
   }
 
   void _onVideoEnd() {
@@ -104,6 +130,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
   @override
   void dispose() {
+    _progressTimer?.cancel();
     _disposeController();
     super.dispose();
   }

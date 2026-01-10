@@ -13,6 +13,7 @@ class AquaConfig {
   static String _defaultLocale = 'en';
   static bool _hideIfEmpty = false;
   static bool _debugMode = false;
+  static bool _noFallbackWhenCarousel = true;
 
   /// Gets the current image refresh interval in seconds.
   static int get imageRefreshSeconds =>
@@ -38,6 +39,9 @@ class AquaConfig {
 
   /// Gets whether debug mode is enabled.
   static bool get debugMode => _debugMode;
+
+  /// Gets whether to filter out fallback ads in carousel mode.
+  static bool get noFallbackWhenCarousel => _noFallbackWhenCarousel;
 
   /// Sets the refresh interval for image advertisements.
   ///
@@ -113,5 +117,13 @@ class AquaConfig {
   /// Default is false.
   static void setDebugMode(bool enabled) {
     _debugMode = enabled;
+  }
+
+  /// Sets whether to filter out fallback ads in carousel mode.
+  ///
+  /// [enabled] controls if fallback ads should be filtered from carousels
+  /// when non-fallback ads are available. Default is true.
+  static void setDefaultNoFallbackWhenCarousel(bool enabled) {
+    _noFallbackWhenCarousel = enabled;
   }
 }
