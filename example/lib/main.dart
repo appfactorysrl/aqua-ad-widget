@@ -9,6 +9,7 @@ void main() {
   AquaConfig.setDefaultBaseUrl('https://delivery.ads.fantasanremo.com/asyncspc.php');
   AquaConfig.setDefaultLocation('https://fantasanremo.com');
   AquaConfig.setDefaultHideIfEmpty(true);
+  AquaConfig.setDebugMode(true); // Abilita/disabilita i log di debug
 
   runApp(const MyApp());
 }
@@ -101,6 +102,7 @@ class HomePage extends StatelessWidget {
                   adCount: 5,
                   showProgressBar: true,
                   progressBarColor: Colors.white,
+                  noFallbackWhenCarousel: true,
                   settings: AquaSettings(
                     adRefreshSeconds: 5,
                     hideIfEmpty: true,

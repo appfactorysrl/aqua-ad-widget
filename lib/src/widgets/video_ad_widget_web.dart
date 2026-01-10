@@ -14,6 +14,7 @@ class VideoAdWidget extends StatefulWidget {
   final ValueChanged<int>? onDurationAvailable;
   final bool initialMuted;
   final ValueChanged<bool>? onMuteChanged;
+  final bool isVisible;
 
   const VideoAdWidget({
     super.key,
@@ -26,6 +27,7 @@ class VideoAdWidget extends StatefulWidget {
     this.onDurationAvailable,
     this.initialMuted = true,
     this.onMuteChanged,
+    this.isVisible = true,
   });
 
   @override
@@ -37,15 +39,30 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   web.HTMLVideoElement? _videoElement;
   late String _viewType;
   Timer? _progressTimer;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _isMuted = widget.initialMuted;
-    _createVideoElement();
+    if (widget.isVisible) {
+      _createVideoElement();
+    }
+  }
+
+  @override
+  void didUpdateWidget(VideoAdWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isVisible && !oldWidget.isVisible && !_isInitialized) {
+      _createVideoElement();
+    } else if (!widget.isVisible && oldWidget.isVisible) {
+      _disposeVideoElement();
+    }
   }
 
   void _createVideoElement() {
+    if (_isInitialized) return;
+    
     _viewType =
         'video-${widget.videoUrl.hashCode}-${DateTime.now().millisecondsSinceEpoch}';
     _videoElement = web.HTMLVideoElement()
@@ -61,26 +78,44 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
     }
 
     _videoElement!.onEnded.listen((_) {
-      widget.onVideoEnded?.call();
+      if (widget.isVisible) {
+        widget.onVideoEnded?.call();
+      }
     });
 
     _videoElement!.onLoadedData.listen((_) {
-      _videoElement!.play();
-      _startProgressTracking();
-      final duration = _videoElement!.duration.toInt();
-      widget.onDurationAvailable?.call(duration);
-      widget.onVideoStarted?.call();
+      if (widget.isVisible && mounted) {
+        _videoElement!.play();
+        _startProgressTracking();
+        final duration = _videoElement!.duration.toInt();
+        widget.onDurationAvailable?.call(duration);
+        widget.onVideoStarted?.call();
+      }
     });
 
     ui_web.platformViewRegistry.registerViewFactory(
       _viewType,
       (int viewId) => _videoElement!,
     );
+    
+    _isInitialized = true;
+  }
+
+  void _disposeVideoElement() {
+    _progressTimer?.cancel();
+    _videoElement?.pause();
+    _videoElement?.remove();
+    _videoElement = null;
+    _isInitialized = false;
   }
   
   void _startProgressTracking() {
     _progressTimer?.cancel();
     _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (!widget.isVisible || !mounted) {
+        timer.cancel();
+        return;
+      }
       if (_videoElement != null && _videoElement!.duration > 0) {
         final progress = _videoElement!.currentTime / _videoElement!.duration;
         widget.onProgressChanged?.call(progress.clamp(0.0, 1.0));
@@ -90,12 +125,21 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   
   @override
   void dispose() {
-    _progressTimer?.cancel();
+    _disposeVideoElement();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.isVisible || !_isInitialized) {
+      return Container(
+        color: Colors.black,
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+
     final child = Stack(
       children: [
         SizedBox.expand(

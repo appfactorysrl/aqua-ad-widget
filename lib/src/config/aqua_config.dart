@@ -12,6 +12,7 @@ class AquaConfig {
   static bool _carouselAutoAdvance = true;
   static String _defaultLocale = 'en';
   static bool _hideIfEmpty = false;
+  static bool _debugMode = false;
 
   /// Gets the current image refresh interval in seconds.
   static int get imageRefreshSeconds =>
@@ -34,6 +35,9 @@ class AquaConfig {
 
   /// Gets whether to hide the widget when no ads are available.
   static bool get hideIfEmpty => _hideIfEmpty;
+
+  /// Gets whether debug mode is enabled.
+  static bool get debugMode => _debugMode;
 
   /// Sets the refresh interval for image advertisements.
   ///
@@ -101,5 +105,13 @@ class AquaConfig {
   /// when loading or when no ads are available. Default is false.
   static void setDefaultHideIfEmpty(bool hide) {
     _hideIfEmpty = hide;
+  }
+
+  /// Sets whether debug mode is enabled.
+  ///
+  /// [enabled] controls if debug logs should be printed to console.
+  /// Default is false.
+  static void setDebugMode(bool enabled) {
+    _debugMode = enabled;
   }
 }
