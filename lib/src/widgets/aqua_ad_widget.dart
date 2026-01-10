@@ -445,6 +445,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       setState(() {
         _progressValue = 0.0; // Reset progress bar
       });
+      // Cancella tutti i timer prima di caricare nuove ads
+      _carouselTimer?.cancel();
+      _videoFallbackTimer?.cancel();
+      _progressTimer?.cancel();
       _loadAd();
       return;
     }
@@ -708,7 +712,12 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             // Nel carousel, passa al prossimo slide quando il video finisce
             _nextSlide();
           }
-        } : null,
+        } : () {
+          // Anche per video singoli, cancella il timer di fallback
+          if (mounted) {
+            _videoFallbackTimer?.cancel();
+          }
+        },
         borderRadius: widget.borderRadius,
         onProgressChanged: widget.showProgressBar ? (progress) {
           // Solo aggiorna se questo video è attualmente visibile e il widget è ancora montato
