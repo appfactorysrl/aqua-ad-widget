@@ -257,9 +257,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
           // Parse beacon tracking pixel
           final beaconUrl = _parseBeaconFromHtml(htmlContent);
-          if (beaconUrl != null) {
-            _loadBeacon(beaconUrl);
-          }
+          // Beacon will be loaded when slide becomes visible
 
           if (videoMatch != null || imageMatch != null) {
             loadedAds.add({
@@ -302,6 +300,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _currentAdIndex = 0;
           _isLoading = false;
           _error = null;
+          _progressValue = 0.0; // Reset progress bar
+          _isVideoControllingProgress = false; // Reset controllo video
         });
         _isLoadingAd = false;
 
@@ -501,9 +501,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
           // Parse beacon tracking pixel
           final beaconUrl = _parseBeaconFromHtml(htmlContent);
-          if (beaconUrl != null) {
-            _loadBeacon(beaconUrl);
-          }
+          // Beacon will be loaded when slide becomes visible
 
           if (videoMatch != null || imageMatch != null) {
             loadedAds.add({
@@ -538,6 +536,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         _currentAdIndex = 0;
         _preloadedAds = null;
         _videoKeyCounter++;
+        _progressValue = 0.0; // Reset progress bar
+        _isVideoControllingProgress = false; // Reset controllo video
         // Non cambiare _isLoading per mantenere le dimensioni
       });
 
@@ -652,6 +652,13 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   }
 
   Widget _buildAdContent(Map<String, dynamic> ad, int index) {
+    // Carica il beacon quando la slide diventa visibile
+    if (ad['beaconUrl'] != null && _currentAdIndex == index) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadBeacon(ad['beaconUrl']);
+      });
+    }
+
     if (ad['isVideo'] && ad['videoUrl'] != null) {
       return VideoAdWidget(
         key: ValueKey('${ad['videoUrl']}_$_videoKeyCounter'),
@@ -659,9 +666,11 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         clickUrl: ad['clickUrl'],
         initialMuted: _isMuted,
         onMuteChanged: (muted) {
-          setState(() {
-            _isMuted = muted;
-          });
+          if (mounted) {
+            setState(() {
+              _isMuted = muted;
+            });
+          }
         },
         onDurationAvailable: _ads.length == 1 ? (duration) {
           // Usa la durata effettiva del video per il cambio automatico
@@ -688,27 +697,37 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         } : null,
         onVideoStarted: _ads.length > 1 ? () {
           // Cancella il timer di fallback quando il video inizia
-          _videoFallbackTimer?.cancel();
+          if (mounted) {
+            _videoFallbackTimer?.cancel();
+          }
         } : null,
         onVideoEnded: _ads.length > 1 ? () {
           // Cancella il timer di fallback se il video finisce normalmente
-          _videoFallbackTimer?.cancel();
-          // Nel carousel, passa al prossimo slide quando il video finisce
-          _nextSlide();
+          if (mounted) {
+            _videoFallbackTimer?.cancel();
+            // Nel carousel, passa al prossimo slide quando il video finisce
+            _nextSlide();
+          }
         } : null,
         borderRadius: widget.borderRadius,
         onProgressChanged: widget.showProgressBar ? (progress) {
-          // Solo aggiorna se questo video è attualmente visibile
-          if (_ads.length > 1 && _currentAdIndex == index) {
-            setState(() {
-              _isVideoControllingProgress = true;
-              _progressValue = progress;
-            });
-          } else if (_ads.length == 1) {
-            setState(() {
-              _isVideoControllingProgress = true;
-              _progressValue = progress;
-            });
+          // Solo aggiorna se questo video è attualmente visibile e il widget è ancora montato
+          if (mounted && _ads.isNotEmpty) {
+            // Verifica che questo sia effettivamente il video corrente usando la key
+            final currentVideoKey = '${_ads[_currentAdIndex]['videoUrl']}_$_videoKeyCounter';
+            final thisVideoKey = '${ad['videoUrl']}_$_videoKeyCounter';
+            
+            if (_ads.length > 1 && _currentAdIndex == index && currentVideoKey == thisVideoKey) {
+              setState(() {
+                _isVideoControllingProgress = true;
+                _progressValue = progress;
+              });
+            } else if (_ads.length == 1 && currentVideoKey == thisVideoKey) {
+              setState(() {
+                _isVideoControllingProgress = true;
+                _progressValue = progress;
+              });
+            }
           }
         } : null,
       );
