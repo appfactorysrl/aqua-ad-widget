@@ -75,7 +75,7 @@ class HomePage extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(16, kToolbarHeight + 16, 16, 16),
             child: Column(
               children: [
-                Text('Zona 2 - Width 528, Ratio 16:9',
+                Text('Zona 9 - Width 528, Ratio 16:9',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -95,10 +95,10 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 AquaAdWidget(
-                  zoneId: 5,
+                  zoneId: 9,
                   ratio: 1440 / 810,
                   borderRadius: 16,
-                  adCount: 'auto',
+                  adCount: 5,
                   showProgressBar: true,
                   progressBarColor: Colors.white,
                   settings: AquaSettings(

@@ -145,6 +145,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   // Progress bar
   double _progressValue = 0.0;
   Timer? _progressTimer;
+  bool _isVideoControllingProgress = false;
 
   // Mute state
   bool _isMuted = true;
@@ -290,7 +291,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             : loadedAds;
 
         // Se adCount è 'auto', memorizza il numero effettivo di annunci ricevuti
-        if (widget.adCount == 'auto' && _detectedAdCount == null) {
+        if (widget.adCount == 'auto') {
           _detectedAdCount = adsToShow.length;
         }
 
@@ -301,6 +302,15 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _error = null;
         });
         _isLoadingAd = false;
+
+        // Reset PageController alla prima pagina se è un carousel
+        if (adsToShow.length > 1 && _pageController.hasClients) {
+          _pageController.animateToPage(
+            0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
 
         if (adsToShow.length == 1) {
           final firstAd = adsToShow[0];
@@ -387,13 +397,31 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     final currentAd = _ads[_currentAdIndex];
     final refreshSeconds =
         widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
-    final imageSeconds = refreshSeconds is bool ? 30 : refreshSeconds;
-    final duration = currentAd['isVideo'] ? 30 : imageSeconds;
+    
+    // Per i video, non avviare timer automatico - sarà gestito dal callback onVideoEnded
+    if (currentAd['isVideo']) {
+      // Reset progress bar per i video e lascia che il video la controlli
+      if (widget.showProgressBar) {
+        setState(() {
+          _progressValue = 0.0;
+          _isVideoControllingProgress = false; // Il video prenderà controllo quando inizia
+        });
+      }
+      return;
+    }
+    
+    // Per le immagini, usa le impostazioni di refresh
+    final imageSeconds = refreshSeconds is bool ? 10 : refreshSeconds;
 
-    // Avvia barra di progresso per carousel
-    _startProgressBar(duration);
+    // Reset e avvia barra di progresso per carousel
+    if (widget.showProgressBar) {
+      setState(() {
+        _progressValue = 0.0;
+      });
+    }
+    _startProgressBar(imageSeconds);
 
-    _carouselTimer = Timer(Duration(seconds: duration), () {
+    _carouselTimer = Timer(Duration(seconds: imageSeconds), () {
       _nextSlide();
     });
   }
@@ -402,6 +430,16 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (_ads.isEmpty) return;
 
     final nextIndex = (_currentAdIndex + 1) % _ads.length;
+    
+    // Se siamo arrivati alla fine del carousel, carica nuovi annunci
+    if (_currentAdIndex == _ads.length - 1) {
+      setState(() {
+        _progressValue = 0.0; // Reset progress bar
+      });
+      _loadAd();
+      return;
+    }
+    
     _pageController.animateToPage(
       nextIndex,
       duration: const Duration(milliseconds: 300),
@@ -494,6 +532,15 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         // Non cambiare _isLoading per mantenere le dimensioni
       });
 
+      // Reset PageController alla prima pagina se è un carousel
+      if (_ads.length > 1 && _pageController.hasClients) {
+        _pageController.animateToPage(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+
       if (_ads.length == 1) {
         final firstAd = _ads[0];
         if (!firstAd['isVideo']) {
@@ -512,6 +559,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   void _startProgressBar(int totalSeconds) {
     if (!widget.showProgressBar) return;
 
+    // Cancella timer esistente e prendi controllo della progress bar
+    _progressTimer?.cancel();
+    _isVideoControllingProgress = false;
+
     setState(() {
       _progressValue = 0.0;
     });
@@ -520,13 +571,19 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     final increment = 1.0 / (totalSeconds * 1000 / updateInterval.inMilliseconds);
 
     _progressTimer = Timer.periodic(updateInterval, (timer) {
-      setState(() {
-        _progressValue += increment;
-        if (_progressValue >= 1.0) {
-          _progressValue = 1.0;
-          timer.cancel();
-        }
-      });
+      // Solo aggiorna se non è un video a controllare la progress bar
+      if (!_isVideoControllingProgress && mounted) {
+        setState(() {
+          _progressValue += increment;
+          if (_progressValue >= 1.0) {
+            _progressValue = 1.0;
+            timer.cancel();
+          }
+        });
+      } else {
+        // Se un video ha preso controllo, ferma questo timer
+        timer.cancel();
+      }
     });
   }
 
@@ -621,12 +678,24 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           });
         } : null,
         onVideoStarted: null,
-        onVideoEnded: null,
+        onVideoEnded: _ads.length > 1 ? () {
+          // Nel carousel, passa al prossimo slide quando il video finisce
+          _nextSlide();
+        } : null,
         borderRadius: widget.borderRadius,
         onProgressChanged: widget.showProgressBar ? (progress) {
-          setState(() {
-            _progressValue = progress;
-          });
+          // Solo aggiorna se questo video è attualmente visibile
+          if (_ads.length > 1 && _currentAdIndex == index) {
+            setState(() {
+              _isVideoControllingProgress = true;
+              _progressValue = progress;
+            });
+          } else if (_ads.length == 1) {
+            setState(() {
+              _isVideoControllingProgress = true;
+              _progressValue = progress;
+            });
+          }
         } : null,
       );
     }
@@ -804,7 +873,14 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           onPageChanged: (index) {
             setState(() {
               _currentAdIndex = index;
+              _progressValue = 0.0; // Reset progress bar
+              _isVideoControllingProgress = false; // Reset controllo
             });
+            
+            // Cancella i timer esistenti
+            _carouselTimer?.cancel();
+            _progressTimer?.cancel();
+            
             if (widget.settings?.carouselAutoAdvance ??
                 AquaConfig.carouselAutoAdvance) {
               _startCarouselTimer();
