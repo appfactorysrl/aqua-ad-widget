@@ -136,6 +136,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
   int _videoKeyCounter = 0;
   final PageController _pageController = PageController();
   Timer? _carouselTimer;
+  Timer? _videoFallbackTimer;
   late AquaLocalizations _localizations;
   int? _detectedAdCount;
   String? _currentLocale;
@@ -183,6 +184,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     _refreshTimer?.cancel();
     _preloadTimer?.cancel();
     _carouselTimer?.cancel();
+    _videoFallbackTimer?.cancel();
     _progressTimer?.cancel();
     _pageController.dispose();
     super.dispose();
@@ -398,7 +400,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     final refreshSeconds =
         widget.settings?.adRefreshSeconds ?? AquaConfig.adRefreshSeconds;
     
-    // Per i video, non avviare timer automatico - sarà gestito dal callback onVideoEnded
+    // Per i video, avvia un timer di fallback in caso non si carichino
     if (currentAd['isVideo']) {
       // Reset progress bar per i video e lascia che il video la controlli
       if (widget.showProgressBar) {
@@ -407,6 +409,13 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _isVideoControllingProgress = false; // Il video prenderà controllo quando inizia
         });
       }
+      
+      // Timer di fallback: se il video non si carica entro 10 secondi, passa al prossimo
+      _videoFallbackTimer = Timer(Duration(seconds: 10), () {
+        if (mounted) {
+          _nextSlide();
+        }
+      });
       return;
     }
     
@@ -631,7 +640,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         );
         overlay.insert(entry);
         
-        Timer(const Duration(seconds: 2), () {
+        Timer(const Duration(seconds: 5), () {
           entry.remove();
         });
       }
@@ -677,8 +686,13 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             }
           });
         } : null,
-        onVideoStarted: null,
+        onVideoStarted: _ads.length > 1 ? () {
+          // Cancella il timer di fallback quando il video inizia
+          _videoFallbackTimer?.cancel();
+        } : null,
         onVideoEnded: _ads.length > 1 ? () {
+          // Cancella il timer di fallback se il video finisce normalmente
+          _videoFallbackTimer?.cancel();
           // Nel carousel, passa al prossimo slide quando il video finisce
           _nextSlide();
         } : null,
@@ -879,6 +893,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
             
             // Cancella i timer esistenti
             _carouselTimer?.cancel();
+            _videoFallbackTimer?.cancel();
             _progressTimer?.cancel();
             
             if (widget.settings?.carouselAutoAdvance ??
