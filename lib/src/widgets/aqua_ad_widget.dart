@@ -731,7 +731,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       if (match != null) {
         final beaconUrl = match.group(1);
         if (beaconUrl != null) {
-          return beaconUrl;
+          // Decodifica le entità HTML nell'URL del beacon
+          return beaconUrl.replaceAll('&amp;', '&');
         }
       }
     }
