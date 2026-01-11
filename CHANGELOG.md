@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.0.1
+
+* Fix impression tracking beacon URL decoding issue
+* Resolve HTML entity decoding in beacon URLs (&amp; -> &)
+* Ensure proper ad impression tracking for zone analytics
+* Fix beacon loading failures that affected impression counting
+
 ## 5.0.0
 
 * **MAJOR**: Fix double video player instantiation in carousels
