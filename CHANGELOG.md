@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.0.2
+
+* Optimize package description for better SEO and search engine visibility
+* Shorten description to 118 characters (within recommended 60-180 range)
+* Improve discoverability on pub.dev and search engines
+
 ## 5.0.1
 
 * Fix impression tracking beacon URL decoding issue
