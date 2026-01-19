@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.0.3
+
+* Fix Safari mobile iOS video fullscreen issue in carousels
+* Add playsinline and webkit-playsinline attributes to prevent automatic fullscreen
+* Add autoplay attribute for immediate video loading on slide change
+* Improve video visibility and playback on iOS Safari
+
 ## 5.0.2
 
 * Optimize package description for better SEO and search engine visibility

@@ -68,8 +68,12 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
     _videoElement = web.HTMLVideoElement()
       ..src = widget.videoUrl
       ..muted = _isMuted
-      ..loop = false;
+      ..loop = false
+      ..autoplay = true
+      ..playsInline = true;
 
+    _videoElement!.setAttribute('playsinline', '');
+    _videoElement!.setAttribute('webkit-playsinline', '');
     _videoElement!.style.width = '100%';
     _videoElement!.style.height = '100%';
     _videoElement!.style.objectFit = 'cover';

@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "aqua_ad_widget",
-      "version": "5.0.1",
+      "version": "5.0.2",
       "dependencies": [
         "flutter",
         "http",
