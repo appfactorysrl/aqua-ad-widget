@@ -785,9 +785,10 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
     if (ad['isVideo'] && ad['videoUrl'] != null) {
       // Determina se questo video è visibile
       final isVisible = _currentAdIndex == index;
+      final videoKey = '${ad['videoUrl']}_$_videoKeyCounter';
       
       return VideoAdWidget(
-        key: ValueKey('${ad['videoUrl']}_$_videoKeyCounter'),
+        key: ValueKey(videoKey),
         videoUrl: ad['videoUrl'],
         clickUrl: ad['clickUrl'],
         initialMuted: _isMuted,
@@ -1040,6 +1041,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
       children: [
         PageView.builder(
           controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(), // Disabilita scroll manuale per evitare rebuild
           onPageChanged: (index) {
             setState(() {
               _currentAdIndex = index;
@@ -1067,8 +1069,18 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           },
           itemCount: _ads.length,
           itemBuilder: (context, index) {
-            // Ricostruisce sempre il widget per aggiornare isVisible
-            return _buildAdContent(_ads[index], index);
+            final ad = _ads[index];
+            final isVisible = _currentAdIndex == index;
+            
+            // Per i video, usa una key che include l'indice per forzare ricreazione
+            if (ad['isVideo']) {
+              return KeyedSubtree(
+                key: ValueKey('video_${index}_$_videoKeyCounter'),
+                child: _buildAdContent(ad, index),
+              );
+            }
+            
+            return _buildAdContent(ad, index);
           },
         ),
         if (widget.showProgressBar)

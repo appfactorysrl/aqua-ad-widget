@@ -18,6 +18,23 @@ dependencies:
   aqua_ad_widget: ^5.0.0
 ```
 
+### Web Setup (Required for HLS Video Support)
+
+For Flutter Web projects, add HLS.js to your `web/index.html` to enable proper HLS video playback:
+
+```html
+<head>
+  <!-- ... other head content ... -->
+  
+  <!-- HLS.js for video streaming support -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  
+  <title>Your App</title>
+</head>
+```
+
+This is **required** for HLS video ads (`.m3u8` files) to work correctly in Chrome and other browsers. Without it, videos may fail to play with codec errors.
+
 ## Usage
 
 ```dart
