@@ -1070,7 +1070,6 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           itemCount: _ads.length,
           itemBuilder: (context, index) {
             final ad = _ads[index];
-            final isVisible = _currentAdIndex == index;
             
             // Per i video, usa una key che include l'indice per forzare ricreazione
             if (ad['isVideo']) {

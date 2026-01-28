@@ -1,5 +1,18 @@
 # Changelog
 
+## 5.1.0
+
+* **MAJOR**: Fix Chrome HLS video playback issues in carousels with HLS.js integration
+* Add HLS.js support for reliable HLS video streaming on web browsers
+* Fix `CHUNK_DEMUXER_ERROR_APPEND_FAILED` error when switching between video slides
+* Improve video lifecycle management with proper mount/unmount handling
+* Add comprehensive debug logging for video playback troubleshooting
+* Reduce unnecessary widget rebuilds in carousel mode
+* Add null-safety checks for all video event listeners
+* Automatic fallback to native video player when HLS.js is not available
+* Web-only changes - no impact on Android, iOS, or desktop platforms
+* Require HLS.js script in web/index.html for optimal video performance
+
 ## 5.0.3
 
 * Fix Safari mobile iOS video fullscreen issue in carousels

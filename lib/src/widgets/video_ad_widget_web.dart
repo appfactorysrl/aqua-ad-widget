@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_web_libraries_in_flutter, non_constant_identifier_names
 @JS()
 library;
 
@@ -6,6 +7,7 @@ import 'package:web/web.dart' as web;
 import 'dart:ui_web' as ui_web;
 import 'dart:async';
 import 'dart:js_interop';
+// ignore: deprecated_member_use
 import 'dart:js_util' as js_util;
 import '../utils/url_launcher.dart';
 import '../config/aqua_config.dart';
