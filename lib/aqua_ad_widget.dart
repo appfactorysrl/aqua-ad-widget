@@ -9,3 +9,5 @@ export 'src/widgets/aqua_ad_widget.dart';
 export 'src/config/aqua_config.dart';
 export 'src/config/aqua_settings.dart';
 export 'src/localization/aqua_localizations.dart';
+export 'src/cache/asset_cache.dart' show AssetCache;
+export 'src/cache/cached_asset_image.dart' show CachedAssetImage;

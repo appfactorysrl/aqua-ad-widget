@@ -7,16 +7,36 @@ import 'package:web/web.dart' as web;
 import 'dart:ui_web' as ui_web;
 import 'dart:async';
 import 'dart:js_interop';
-// ignore: deprecated_member_use
-import 'dart:js_util' as js_util;
 import '../utils/url_launcher.dart';
 import '../config/aqua_config.dart';
 
+/// Static interop binding for the global `Hls` class provided by HLS.js
+/// (loaded via a `<script>` tag in the host page). Declared with
+/// `dart:js_interop` so it is compatible with both JS and WebAssembly targets.
+///
+/// Uses `@staticInterop` (rather than an extension type) so it compiles on the
+/// package's minimum Dart SDK (3.0), where extension types are not yet
+/// available.
 @JS('Hls')
-external JSAny get Hls;
+@staticInterop
+class Hls {
+  /// `new Hls()`
+  external factory Hls();
 
-@JS('Hls.isSupported')
-external JSFunction get hlsIsSupported;
+  /// `Hls.isSupported()`
+  external static bool isSupported();
+}
+
+extension HlsMethods on Hls {
+  /// `hls.loadSource(url)`
+  external void loadSource(String url);
+
+  /// `hls.attachMedia(element)`
+  external void attachMedia(web.HTMLVideoElement element);
+
+  /// `hls.destroy()`
+  external void destroy();
+}
 
 class VideoAdWidget extends StatefulWidget {
   final String videoUrl;
@@ -30,6 +50,11 @@ class VideoAdWidget extends StatefulWidget {
   final ValueChanged<bool>? onMuteChanged;
   final bool isVisible;
 
+  /// Accepted for API parity with the mobile/desktop implementation. Ignored
+  /// on the web: browsers have no filesystem here, so videos always stream
+  /// from the network (the browser HTTP cache may still apply).
+  final bool cacheAssets;
+
   const VideoAdWidget({
     super.key,
     required this.videoUrl,
@@ -42,6 +67,7 @@ class VideoAdWidget extends StatefulWidget {
     this.initialMuted = true,
     this.onMuteChanged,
     this.isVisible = true,
+    this.cacheAssets = true,
   });
 
   @override
@@ -54,7 +80,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   late String _viewType;
   Timer? _progressTimer;
   bool _isInitialized = false;
-  Object? _hls;
+  Hls? _hls;
 
   void _debugLog(String message) {
     if (AquaConfig.debugMode) {
@@ -66,7 +92,8 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   @override
   void initState() {
     super.initState();
-    _debugLog('🎬 initState - videoUrl: ${widget.videoUrl}, isVisible: ${widget.isVisible}');
+    _debugLog(
+        '🎬 initState - videoUrl: ${widget.videoUrl}, isVisible: ${widget.isVisible}');
     _isMuted = widget.initialMuted;
     if (widget.isVisible) {
       _createVideoElement();
@@ -76,11 +103,12 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   @override
   void didUpdateWidget(VideoAdWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Solo logga se cambia effettivamente la visibilità
     if (oldWidget.isVisible != widget.isVisible) {
-      _debugLog('🔄 didUpdateWidget - oldVisible: ${oldWidget.isVisible}, newVisible: ${widget.isVisible}, initialized: $_isInitialized');
-      
+      _debugLog(
+          '🔄 didUpdateWidget - oldVisible: ${oldWidget.isVisible}, newVisible: ${widget.isVisible}, initialized: $_isInitialized');
+
       if (widget.isVisible && !oldWidget.isVisible) {
         _debugLog('  → Video becoming visible');
         if (!_isInitialized) {
@@ -103,12 +131,12 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
       _debugLog('⚠️ _createVideoElement called but already initialized');
       return;
     }
-    
+
     // Aggiungi timestamp al viewType per garantire unicità assoluta
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     _viewType = 'video-${widget.videoUrl.hashCode}-$timestamp';
     _debugLog('🎥 Creating video element - viewType: $_viewType');
-    
+
     _videoElement = web.HTMLVideoElement()
       ..muted = _isMuted
       ..loop = false
@@ -116,7 +144,11 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
     _videoElement!.setAttribute('playsinline', '');
     _videoElement!.setAttribute('webkit-playsinline', '');
-    _videoElement!.setAttribute('preload', 'metadata'); // Carica solo metadata inizialmente
+    // Stream progressively: only metadata is fetched up front and playback
+    // begins on the `canplay` event as soon as enough has buffered, rather than
+    // waiting for the full file to download. Video is intentionally not routed
+    // through the byte-level asset cache so it keeps streaming.
+    _videoElement!.setAttribute('preload', 'metadata');
     _videoElement!.style.width = '100%';
     _videoElement!.style.height = '100%';
     _videoElement!.style.objectFit = 'cover';
@@ -126,7 +158,8 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
     _videoElement!.onLoadedMetadata.listen((_) {
       if (_videoElement == null || !mounted) return;
-      _debugLog('📊 Video metadata loaded - duration: ${_videoElement!.duration}s');
+      _debugLog(
+          '📊 Video metadata loaded - duration: ${_videoElement!.duration}s');
     });
 
     _videoElement!.onCanPlay.listen((_) {
@@ -174,7 +207,8 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
     _videoElement!.onLoadedData.listen((_) {
       if (_videoElement == null || !mounted) return;
-      _debugLog('📦 Video data loaded, isVisible: ${widget.isVisible}, mounted: $mounted');
+      _debugLog(
+          '📦 Video data loaded, isVisible: ${widget.isVisible}, mounted: $mounted');
       if (widget.isVisible && mounted) {
         _startProgressTracking();
         final duration = _videoElement!.duration.toInt();
@@ -190,20 +224,21 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
       _viewType,
       (int viewId) => _videoElement!,
     );
-    
+
     _isInitialized = true;
     _debugLog('✅ Video element created and registered');
-    
+
     // Usa hls.js se disponibile e se è un file HLS
     final isHLS = widget.videoUrl.contains('.m3u8');
     if (isHLS) {
       try {
-        final isSupported = js_util.callMethod(hlsIsSupported, 'call', []) as bool;
+        final isSupported = Hls.isSupported();
         if (isSupported) {
           _debugLog('🔗 Using HLS.js for: ${widget.videoUrl}');
-          _hls = js_util.callConstructor(Hls, []);
-          js_util.callMethod(_hls!, 'loadSource', [widget.videoUrl]);
-          js_util.callMethod(_hls!, 'attachMedia', [_videoElement]);
+          final hls = Hls();
+          _hls = hls;
+          hls.loadSource(widget.videoUrl);
+          hls.attachMedia(_videoElement!);
         } else {
           _debugLog('🔗 HLS.js not supported, using native');
           _videoElement!.src = widget.videoUrl;
@@ -216,7 +251,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
       }
     } else {
       _debugLog('🔗 Using native video for: ${widget.videoUrl}');
-      final srcWithTimestamp = widget.videoUrl.contains('?') 
+      final srcWithTimestamp = widget.videoUrl.contains('?')
           ? '${widget.videoUrl}&_t=$timestamp'
           : '${widget.videoUrl}?_t=$timestamp';
       _videoElement!.src = srcWithTimestamp;
@@ -227,17 +262,17 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   void _disposeVideoElement() {
     _debugLog('🗑️ Disposing video element');
     _progressTimer?.cancel();
-    
+
     // Distruggi hls.js se presente
     if (_hls != null) {
       try {
-        js_util.callMethod(_hls!, 'destroy', []);
+        _hls!.destroy();
       } catch (e) {
         _debugLog('⚠️ Error destroying HLS: $e');
       }
       _hls = null;
     }
-    
+
     if (_videoElement != null) {
       try {
         _videoElement!.pause();
@@ -251,7 +286,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
     }
     _isInitialized = false;
   }
-  
+
   void _startProgressTracking() {
     _debugLog('📊 Starting progress tracking');
     _progressTimer?.cancel();
@@ -267,7 +302,7 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
       }
     });
   }
-  
+
   @override
   void dispose() {
     _debugLog('🗑️ Widget dispose called');

@@ -14,6 +14,7 @@ class AquaConfig {
   static bool _hideIfEmpty = false;
   static bool _debugMode = false;
   static bool _noFallbackWhenCarousel = true;
+  static bool _cacheAssets = true;
 
   /// Gets the current image refresh interval in seconds.
   static int get imageRefreshSeconds =>
@@ -42,6 +43,9 @@ class AquaConfig {
 
   /// Gets whether to filter out fallback ads in carousel mode.
   static bool get noFallbackWhenCarousel => _noFallbackWhenCarousel;
+
+  /// Gets whether asset caching is enabled.
+  static bool get cacheAssets => _cacheAssets;
 
   /// Sets the refresh interval for image advertisements.
   ///
@@ -125,5 +129,21 @@ class AquaConfig {
   /// when non-fallback ads are available. Default is true.
   static void setDefaultNoFallbackWhenCarousel(bool enabled) {
     _noFallbackWhenCarousel = enabled;
+  }
+
+  /// Sets whether asset caching is enabled globally.
+  ///
+  /// [enabled] controls whether image and video assets (including HLS) are
+  /// cached on device and reused across widget instances and refreshes.
+  /// Default is true.
+  ///
+  /// Caching is keyed by the asset URL. The ad server serves a distinct URL
+  /// for every creative version (the filename is content-addressed), so when
+  /// the asset served at a zone changes, its URL changes too and the widget
+  /// automatically loads and caches the new asset without serving stale bytes.
+  /// Videos stream from the network on a miss while being cached in the
+  /// background, so playback is never blocked by caching.
+  static void setDefaultCacheAssets(bool enabled) {
+    _cacheAssets = enabled;
   }
 }

@@ -38,6 +38,13 @@ class AquaSettings {
   /// If null, uses global default.
   final bool? noFallbackWhenCarousel;
 
+  /// Whether asset caching is enabled for this widget instance.
+  ///
+  /// Applies to both image and video ads (including HLS).
+  /// If null, uses the global default set via
+  /// [AquaConfig.setDefaultCacheAssets].
+  final bool? cacheAssets;
+
   /// Creates an [AquaSettings] instance.
   const AquaSettings({
     this.adRefreshSeconds,
@@ -47,5 +54,6 @@ class AquaSettings {
     this.locale,
     this.hideIfEmpty,
     this.noFallbackWhenCarousel,
+    this.cacheAssets,
   });
 }
