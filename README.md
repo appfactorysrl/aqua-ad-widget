@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^5.0.0
+  aqua_ad_widget: ^5.2.0
 ```
 
 ### Web Setup (Required for HLS Video Support)
@@ -34,6 +34,26 @@ For Flutter Web projects, add HLS.js to your `web/index.html` to enable proper H
 ```
 
 This is **required** for HLS video ads (`.m3u8` files) to work correctly in Chrome and other browsers. Without it, videos may fail to play with codec errors.
+
+### iOS Setup (App Transport Security)
+
+Ad creatives (images and videos) are served from third-party domains, and some
+are delivered over plain HTTP (the default ad server uses `http://`). iOS blocks
+non-HTTPS network loads by default, which prevents assets from loading and can
+make a video ad appear stuck (the widget keeps retrying without ever playing).
+
+Add an App Transport Security exception to your app's `ios/Runner/Info.plist`.
+Scope it to your ad domains where you can:
+
+```xml
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSAllowsArbitraryLoads</key>
+  <true/>
+</dict>
+```
+
+The same applies to macOS (`macos/Runner/Info.plist`).
 
 ## Usage
 
@@ -57,6 +77,9 @@ AquaConfig.setDefaultLocale('en'); // 'en', 'it', 'es', 'fr', 'de'
 // Configure hide behavior (optional, default: false)
 AquaConfig.setDefaultHideIfEmpty(true); // hide widget when no ads available
 
+// Configure image caching (optional, default: true)
+AquaConfig.setDefaultCacheAssets(true); // cache image ads on device
+
 // Display an ad
 AquaAdWidget(
   zoneId: 123,
@@ -73,6 +96,7 @@ AquaAdWidget(
     location: 'https://mypage.com',
     locale: 'it', // override global locale
     hideIfEmpty: true, // override global hide behavior
+    cacheAssets: true, // override global image caching
   ),
 )
 
@@ -112,6 +136,7 @@ AquaAdWidget(
   - `locale`: Override language ('en', 'it', 'es', 'fr', 'de')
   - `hideIfEmpty`: Override hide behavior when no ads available
   - `noFallbackWhenCarousel`: Override fallback filtering in carousels
+  - `cacheAssets`: Override image caching for this widget instance (images only; videos always stream)
 
 ## Supported Banner Types
 
@@ -133,6 +158,8 @@ Currently compatible with the following banner types:
 - **Carousel Auto-Advance**: Configurable automatic slide progression in carousels
 - **Multi-Language Support**: Automatic locale detection with support for 5 languages (EN, IT, ES, FR, DE)
 - **Hide When Empty**: Optional configuration to hide widget completely when no ads available
+- **Image Caching**: Image ads are cached on device (memory + disk) and reused across refreshes; enabled by default and safe against remote changes
+- **Progressive Video Streaming**: Video ads (including HLS) stream from the network and start playing as soon as enough has buffered
 
 ## Configuration
 
@@ -166,6 +193,9 @@ void main() {
   
   // Optional: Filter fallback ads from carousels (default: true)
   AquaConfig.setDefaultNoFallbackWhenCarousel(true);
+  
+  // Optional: Enable/disable image caching (default: true)
+  AquaConfig.setDefaultCacheAssets(true);
   
   runApp(MyApp());
 }
@@ -250,6 +280,56 @@ AquaAdWidget(
 // - When false: All ads (including fallbacks) are shown
 // - Single ads are never filtered (only applies to carousels)
 ```
+
+## Image Caching
+
+Image ads are cached on the device so repeated impressions and refreshes reuse
+already-downloaded bytes instead of hitting the network every time. Caching is
+enabled by default.
+
+This applies to image ads only. Video ads always stream from the network (see
+the note below).
+
+```dart
+// Global configuration (default: true)
+AquaConfig.setDefaultCacheAssets(true);
+
+// Per-widget override
+AquaAdWidget(
+  zoneId: 123,
+  settings: AquaSettings(
+    cacheAssets: false, // disable caching for this widget only
+  ),
+)
+```
+
+How it works:
+
+- **URL-keyed**: the cache key is the asset URL. The ad server serves a distinct,
+  content-addressed URL for every creative version, so when a creative changes
+  the URL changes too. That means the cache is always safe: a changed asset has
+  a new key and is fetched fresh, and cached bytes are never served stale. No
+  polling or revalidation of the server is performed.
+- **Layered**: lookups resolve from an in-memory LRU, then an on-disk store, then
+  the network. Newly fetched bytes populate both faster layers.
+- **Cross-platform**: disk persistence is used on Android, iOS, macOS, Linux and
+  Windows. On the web there is no filesystem, so caching operates in memory only
+  for the session.
+- **Bounded**: the in-memory layer is capped by entry count and total size and
+  evicts least-recently-used assets automatically.
+
+You can manage the cache programmatically:
+
+```dart
+await AssetCache.instance.clear();        // remove everything
+await AssetCache.instance.evict(assetUrl); // remove a single asset
+```
+
+### Video Ads
+
+Video ads (including HLS `.m3u8`) are **not cached**. They always stream from
+the network and play progressively, starting as soon as enough has buffered.
+The `cacheAssets` flag only affects image ads.
 
 ### Finding Your Server URL
 

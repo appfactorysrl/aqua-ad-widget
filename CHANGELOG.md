@@ -1,5 +1,16 @@
 # Changelog
 
+## 5.2.0
+
+* Add URL-keyed asset caching for image ads (enabled by default)
+* Cache resolves in three layers: in-memory LRU, on-disk persistence (Android, iOS, macOS, Linux, Windows), then network
+* On the web the cache operates in memory only (no filesystem access)
+* Because the ad server serves a distinct content-addressed URL per creative version, cached bytes are never stale: a changed asset has a new URL and is fetched fresh automatically
+* Add global `AquaConfig.setDefaultCacheAssets(bool)` flag and per-widget `AquaSettings(cacheAssets: ...)` override
+* Expose `AssetCache.instance` (with `clear()` / `evict(url)`) and `CachedAssetImage` from the public API
+* Video ads (including HLS `.m3u8`) are not cached; they always stream from the network and start playing as soon as enough has buffered
+* Add `path_provider` and `crypto` dependencies for disk-backed image caching
+
 ## 5.1.0
 
 * **MAJOR**: Fix Chrome HLS video playback issues in carousels with HLS.js integration
