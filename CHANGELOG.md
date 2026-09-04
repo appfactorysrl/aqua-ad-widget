@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.2.1
+
+* Add `onEmptyChanged` callback to `AquaAdWidget`, reporting when the widget has no ad to display (and back), so parents can react to whether an ad is showing
+
 ## 5.2.0
 
 * Add URL-keyed asset caching for image ads (enabled by default)

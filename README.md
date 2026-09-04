@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^5.2.0
+  aqua_ad_widget: ^5.2.1
 ```
 
 ### Web Setup (Required for HLS Video Support)
@@ -128,6 +128,7 @@ AquaAdWidget(
 - `borderRadius`: Border radius for rounded corners in pixels (optional, default: null). Applies to both image and video ads
 - `showProgressBar`: Whether to show the progress bar (optional, default: false). Displays a progress bar at the bottom of the widget
 - `progressBarColor`: The color of the progress bar (optional, default: Colors.white). Customizable progress bar color
+- `onEmptyChanged`: Callback invoked when the widget's empty state changes (optional). Receives `true` when there is no ad to display and `false` when an ad is available. Useful for hiding surrounding layout when no ad is served
 - `settings`: Custom settings for this widget instance (optional). Use `AquaSettings` to override global defaults for specific widgets
   - `adRefreshSeconds`: Override refresh interval
   - `carouselAutoAdvance`: Override carousel auto-advance
@@ -241,6 +242,33 @@ AquaAdWidget(
   ),
 )
 ```
+
+## Reacting to Empty Ads
+
+Use `onEmptyChanged` to know whether an ad is actually being shown, for example
+to hide a surrounding container, title, or padding when no ad is served:
+
+```dart
+bool _adEmpty = true;
+
+// ...
+
+Column(
+  children: [
+    if (!_adEmpty) const Text('Sponsored'),
+    AquaAdWidget(
+      zoneId: 123,
+      onEmptyChanged: (isEmpty) {
+        setState(() => _adEmpty = isEmpty);
+      },
+    ),
+  ],
+)
+```
+
+The callback fires with `true` when the widget has no ad to display and `false`
+once an ad is available, and only when the value changes. Combine it with
+`hideIfEmpty: true` so the widget itself occupies no space while empty.
 
 ## Debug Mode
 
