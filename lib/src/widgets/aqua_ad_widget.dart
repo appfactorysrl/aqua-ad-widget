@@ -96,6 +96,19 @@ class AquaAdWidget extends StatefulWidget {
   /// Defaults to white.
   final Color progressBarColor;
 
+  /// Called whenever the widget's "empty" state changes.
+  ///
+  /// The widget is considered empty when it has no ad to display — the same
+  /// condition under which it renders nothing (a `SizedBox.shrink()` when
+  /// [AquaSettings.hideIfEmpty] is enabled). This lets a parent react to
+  /// whether an ad is actually showing, for example to hide surrounding
+  /// layout (padding, titles) when no ad is available.
+  ///
+  /// The callback fires with `true` when the widget becomes empty and `false`
+  /// when it has an ad to show. It is invoked after the relevant load attempt
+  /// settles, and only when the value actually changes.
+  final ValueChanged<bool>? onEmptyChanged;
+
   /// Creates an [AquaAdWidget].
   ///
   /// The [zoneId] parameter is required and must correspond to a valid
@@ -114,6 +127,7 @@ class AquaAdWidget extends StatefulWidget {
     this.borderRadius,
     this.showProgressBar = false,
     this.progressBarColor = Colors.white,
+    this.onEmptyChanged,
   });
 
   @override
@@ -153,6 +167,26 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
 
   // Mute state
   bool _isMuted = true;
+
+  // Last "empty" value reported via onEmptyChanged. Starts null so the first
+  // resolution always notifies.
+  bool? _lastReportedEmpty;
+
+  /// Whether the widget currently has no ad to display.
+  ///
+  /// This mirrors the condition under which the widget renders nothing: there
+  /// are no ads available. It is `true` while there is no ad (including the
+  /// initial load, an error, or a genuine no-fill), and `false` once at least
+  /// one ad is available to show.
+  bool get isEmpty => _ads.isEmpty;
+
+  /// Notifies [AquaAdWidget.onEmptyChanged] when the empty state changes.
+  void _notifyEmptyChanged() {
+    final empty = isEmpty;
+    if (empty == _lastReportedEmpty) return;
+    _lastReportedEmpty = empty;
+    widget.onEmptyChanged?.call(empty);
+  }
 
   void _debugLog(String message) {
     if (AquaConfig.debugMode) {
@@ -241,6 +275,8 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _error = _localizations.locationNotConfigured;
           _isLoading = false;
         });
+        _isLoadingAd = false;
+        _notifyEmptyChanged();
         return;
       }
 
@@ -326,6 +362,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _isVideoControllingProgress = false; // Reset controllo video
         });
         _isLoadingAd = false;
+        _notifyEmptyChanged();
 
         // Reset PageController alla prima pagina se è un carousel
         if (filteredAds.length > 1 && _pageController.hasClients) {
@@ -363,6 +400,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
           _isLoading = false;
         });
         _isLoadingAd = false;
+        _notifyEmptyChanged();
         // Non avviare timer se non ci sono annunci
         return;
       }
@@ -374,6 +412,7 @@ class _AquaAdWidgetState extends State<AquaAdWidget> {
         });
       }
       _isLoadingAd = false;
+      _notifyEmptyChanged();
       // Non avviare timer in caso di errore
       return;
     }
