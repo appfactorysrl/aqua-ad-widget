@@ -15,6 +15,8 @@ class VideoAdWidget extends StatefulWidget {
   final ValueChanged<bool>? onMuteChanged;
   final bool isVisible;
 
+  final bool cacheAssets;
+
   const VideoAdWidget({
     super.key,
     required this.videoUrl,
@@ -27,6 +29,7 @@ class VideoAdWidget extends StatefulWidget {
     this.initialMuted = true,
     this.onMuteChanged,
     this.isVisible = true,
+    this.cacheAssets = false,
   });
 
   @override
@@ -61,12 +64,13 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
   void _initializeController() {
     if (_isInitialized) return;
-    
+
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
       ..initialize().then((_) {
         if (widget.isVisible && mounted && _controller != null) {
           // Verifica che il video sia effettivamente caricato
-          if (_controller!.value.isInitialized && _controller!.value.duration.inMilliseconds > 0) {
+          if (_controller!.value.isInitialized &&
+              _controller!.value.duration.inMilliseconds > 0) {
             setState(() {});
             _controller!.setVolume(_isMuted ? 0.0 : 1.0);
             _controller!.play();
@@ -105,8 +109,8 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
         return;
       }
       if (_controller!.value.duration.inMilliseconds > 0) {
-        final progress = _controller!.value.position.inMilliseconds / 
-                        _controller!.value.duration.inMilliseconds;
+        final progress = _controller!.value.position.inMilliseconds /
+            _controller!.value.duration.inMilliseconds;
         widget.onProgressChanged?.call(progress.clamp(0.0, 1.0));
       }
     });
@@ -114,16 +118,16 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
   void _onVideoEnd() {
     if (!widget.isVisible || _controller == null) return;
-    
+
     if (_hasStarted &&
         _controller!.value.position >= _controller!.value.duration) {
       widget.onVideoEnded?.call();
     }
-    
+
     // Aggiorna progresso solo se visibile
     if (_controller!.value.duration.inMilliseconds > 0) {
-      final progress = _controller!.value.position.inMilliseconds / 
-                      _controller!.value.duration.inMilliseconds;
+      final progress = _controller!.value.position.inMilliseconds /
+          _controller!.value.duration.inMilliseconds;
       widget.onProgressChanged?.call(progress.clamp(0.0, 1.0));
     }
   }
@@ -137,7 +141,9 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.isVisible || _controller == null || !_controller!.value.isInitialized) {
+    if (!widget.isVisible ||
+        _controller == null ||
+        !_controller!.value.isInitialized) {
       return Container(
         color: Colors.black,
         child: const Center(
