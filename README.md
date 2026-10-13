@@ -15,7 +15,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  aqua_ad_widget: ^5.2.1
+  aqua_ad_widget: ^5.2.2
 ```
 
 ### Web Setup (Required for HLS Video Support)
