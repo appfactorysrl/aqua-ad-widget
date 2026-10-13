@@ -65,8 +65,12 @@ class _VideoAdWidgetState extends State<VideoAdWidget> {
   void _initializeController() {
     if (_isInitialized) return;
 
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-      ..initialize().then((_) {
+    // Use a mixable audio session so an ad video coexists with other audio
+    // (e.g. the user's music) instead of taking exclusive audio focus.
+    _controller = VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoUrl),
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+    )..initialize().then((_) {
         if (widget.isVisible && mounted && _controller != null) {
           // Verifica che il video sia effettivamente caricato
           if (_controller!.value.isInitialized &&
