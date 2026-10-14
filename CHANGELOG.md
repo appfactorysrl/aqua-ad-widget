@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.2.2
+
+* Play video ads with a mixable audio session (`mixWithOthers`) on Android and iOS, so a (muted) ad video no longer interrupts the user's background music or loses playback when that music resumes
+
 ## 5.2.1
 
 * Add `onEmptyChanged` callback to `AquaAdWidget`, reporting when the widget has no ad to display (and back), so parents can react to whether an ad is showing
